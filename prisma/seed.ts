@@ -41,17 +41,38 @@ async function main() {
   }
 
   // 3. Create Users (Super Admin, Admin, Editor, Author, User)
-  const passwordHash = await bcrypt.hash("password123", 10);
+  const userPasswordHash = await bcrypt.hash("Me095808176", 10);
+  const defaultPasswordHash = await bcrypt.hash("password123", 10);
+  const passwordHash = defaultPasswordHash;
 
   const superAdmin = await prisma.user.upsert({
-    where: { email: "superadmin@news.com" },
-    update: {},
+    where: { email: "admin@tourism-seasons.app" },
+    update: {
+      passwordHash: userPasswordHash,
+      role: "SUPERADMIN",
+    },
     create: {
       name: "Chief Super Admin",
-      email: "superadmin@news.com",
-      passwordHash,
+      email: "admin@tourism-seasons.app",
+      passwordHash: userPasswordHash,
       role: "SUPERADMIN",
       bio: "Root administrator with full role delegation privileges.",
+      image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80",
+    },
+  });
+
+  await prisma.user.upsert({
+    where: { email: "superadmin@news.com" },
+    update: {
+      passwordHash: userPasswordHash,
+      role: "SUPERADMIN",
+    },
+    create: {
+      name: "Super Admin",
+      email: "superadmin@news.com",
+      passwordHash: userPasswordHash,
+      role: "SUPERADMIN",
+      bio: "Root administrator.",
       image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80",
     },
   });
