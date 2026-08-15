@@ -57,40 +57,40 @@ export default async function AdminUsersPage() {
       </div>
 
       {/* Role Summary Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-        <div className="bg-white border border-slate-200 p-4 rounded-xl text-center shadow-sm">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+        <div className="bg-white border border-slate-200 p-3.5 sm:p-4 rounded-xl text-center shadow-sm">
           <span className="text-[10px] uppercase font-bold text-red-600 tracking-wider">Super Admin</span>
-          <div className="text-2xl font-black text-slate-900 mt-1">{counts.SUPERADMIN}</div>
+          <div className="text-xl sm:text-2xl font-black text-slate-900 mt-1">{counts.SUPERADMIN}</div>
         </div>
-        <div className="bg-white border border-slate-200 p-4 rounded-xl text-center shadow-sm">
+        <div className="bg-white border border-slate-200 p-3.5 sm:p-4 rounded-xl text-center shadow-sm">
           <span className="text-[10px] uppercase font-bold text-purple-600 tracking-wider">Admin</span>
-          <div className="text-2xl font-black text-slate-900 mt-1">{counts.ADMIN}</div>
+          <div className="text-xl sm:text-2xl font-black text-slate-900 mt-1">{counts.ADMIN}</div>
         </div>
-        <div className="bg-white border border-slate-200 p-4 rounded-xl text-center shadow-sm">
+        <div className="bg-white border border-slate-200 p-3.5 sm:p-4 rounded-xl text-center shadow-sm">
           <span className="text-[10px] uppercase font-bold text-blue-600 tracking-wider">Editor</span>
-          <div className="text-2xl font-black text-slate-900 mt-1">{counts.EDITOR}</div>
+          <div className="text-xl sm:text-2xl font-black text-slate-900 mt-1">{counts.EDITOR}</div>
         </div>
-        <div className="bg-white border border-slate-200 p-4 rounded-xl text-center shadow-sm">
+        <div className="bg-white border border-slate-200 p-3.5 sm:p-4 rounded-xl text-center shadow-sm">
           <span className="text-[10px] uppercase font-bold text-emerald-600 tracking-wider">Author</span>
-          <div className="text-2xl font-black text-slate-900 mt-1">{counts.AUTHOR}</div>
+          <div className="text-xl sm:text-2xl font-black text-slate-900 mt-1">{counts.AUTHOR}</div>
         </div>
-        <div className="bg-white border border-slate-200 p-4 rounded-xl text-center shadow-sm">
+        <div className="bg-white border border-slate-200 p-3.5 sm:p-4 rounded-xl text-center shadow-sm col-span-2 sm:col-span-1">
           <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">User</span>
-          <div className="text-2xl font-black text-slate-900 mt-1">{counts.USER}</div>
+          <div className="text-xl sm:text-2xl font-black text-slate-900 mt-1">{counts.USER}</div>
         </div>
       </div>
 
       {/* Users Table */}
       <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-        <div className="p-4 border-b border-slate-200 flex items-center justify-between">
+        <div className="p-4 border-b border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
             <Users className="w-4 h-4 text-[#2791F5]" /> Registered User Directory ({users.length})
           </h2>
           <span className="text-xs text-slate-500">Your Role: <span className="font-bold text-[#2791F5]">{currentUserRole}</span></span>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+        <div className="overflow-x-auto min-w-full">
+          <table className="w-full text-left text-xs min-w-[640px]">
             <thead className="text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
               <tr>
                 <th className="p-4">User</th>

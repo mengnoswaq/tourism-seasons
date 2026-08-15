@@ -96,7 +96,7 @@ export default async function AdminDashboardPage() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 pb-6">
         <div>
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
             <span className="text-xs font-bold uppercase tracking-wider text-[#2791F5]">
               Executive Command Center & Analytics Hub
             </span>
@@ -104,20 +104,20 @@ export default async function AdminDashboardPage() {
               <ShieldCheck className="w-3.5 h-3.5" /> {userRole}
             </Badge>
           </div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">System Dashboard & Interactive Chart Analysis</h1>
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">System Dashboard & Interactive Chart Analysis</h1>
           <p className="text-xs text-slate-500 mt-1">Real-time platform metrics, interactive traffic trends, and desk section breakdown</p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
           {(userRole === "SUPERADMIN" || userRole === "ADMIN") && (
-            <Link href="/admin/users">
-              <Button variant="outline" size="sm" className="gap-2 text-xs border-slate-200 text-slate-700">
+            <Link href="/admin/users" className="w-full sm:w-auto">
+              <Button variant="outline" size="sm" className="gap-2 text-xs border-slate-200 text-slate-700 w-full sm:w-auto justify-center">
                 <UserCheck className="w-4 h-4 text-[#2791F5]" /> Manage Roles
               </Button>
             </Link>
           )}
-          <Link href="/admin/articles/create">
-            <Button variant="primary" size="sm" className="gap-2 text-xs font-bold">
+          <Link href="/admin/articles/create" className="w-full sm:w-auto">
+            <Button variant="primary" size="sm" className="gap-2 text-xs font-bold w-full sm:w-auto justify-center">
               <PlusCircle className="w-4 h-4" /> Create Story
             </Button>
           </Link>
@@ -125,7 +125,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* KPI Overview Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         
         <Card className="bg-white border-slate-200 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -133,7 +133,7 @@ export default async function AdminDashboardPage() {
             <Eye className="w-5 h-5 text-[#2791F5]" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-black text-slate-900">{totalViews.toLocaleString()}</div>
+            <div className="text-2xl sm:text-3xl font-black text-slate-900">{totalViews.toLocaleString()}</div>
             <p className="text-[11px] text-emerald-600 font-semibold mt-1 flex items-center gap-1">
               <TrendingUp className="w-3.5 h-3.5" /> +24.8% reader retention
             </p>
@@ -146,7 +146,7 @@ export default async function AdminDashboardPage() {
             <Newspaper className="w-5 h-5 text-indigo-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-black text-slate-900">{articleCount}</div>
+            <div className="text-2xl sm:text-3xl font-black text-slate-900">{articleCount}</div>
             <p className="text-[11px] text-slate-500 mt-1">{draftCount} draft stories pending review</p>
           </CardContent>
         </Card>
@@ -157,7 +157,7 @@ export default async function AdminDashboardPage() {
             <MessageSquare className="w-5 h-5 text-purple-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-black text-slate-900">{commentCount}</div>
+            <div className="text-2xl sm:text-3xl font-black text-slate-900">{commentCount}</div>
             <p className="text-[11px] text-slate-500 mt-1">Active nested discussion threads</p>
           </CardContent>
         </Card>
@@ -169,7 +169,7 @@ export default async function AdminDashboardPage() {
               <Users className="w-5 h-5 text-amber-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-black text-slate-900">{userCount}</div>
+              <div className="text-2xl sm:text-3xl font-black text-slate-900">{userCount}</div>
               <p className="text-[11px] text-[#2791F5] font-semibold mt-1 flex items-center gap-1">
                 Manage Roles & Access <ArrowUpRight className="w-3 h-3" />
               </p>
@@ -187,9 +187,9 @@ export default async function AdminDashboardPage() {
       />
 
       {/* Most Read Articles Grid */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4 shadow-sm">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-          <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+      <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 space-y-4 shadow-sm">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
             <Flame className="w-5 h-5 text-orange-500" /> Top Performing Stories Ranking
           </h2>
           <Link href="/admin/articles" className="text-xs font-semibold text-[#2791F5] hover:underline flex items-center gap-1">
@@ -200,15 +200,15 @@ export default async function AdminDashboardPage() {
         <div className="space-y-3">
           {topArticles.map((article, idx) => (
             <div key={article.id} className="flex items-center justify-between p-3.5 rounded-xl hover:bg-slate-50 transition-colors border border-slate-100">
-              <div className="flex items-center gap-4">
-                <span className="text-xl font-black text-[#2791F5] w-6 text-center">0{idx + 1}</span>
-                <div>
+              <div className="flex items-center gap-3 sm:gap-4 overflow-hidden">
+                <span className="text-lg sm:text-xl font-black text-[#2791F5] w-6 shrink-0 text-center">0{idx + 1}</span>
+                <div className="min-w-0">
                   <Link href={`/articles/${article.slug}`} target="_blank">
-                    <h3 className="text-xs font-bold text-slate-900 hover:text-[#2791F5] transition-colors line-clamp-1">
+                    <h3 className="text-xs font-bold text-slate-900 hover:text-[#2791F5] transition-colors truncate">
                       {article.title}
                     </h3>
                   </Link>
-                  <div className="flex items-center gap-2 text-[10px] text-slate-400 mt-1">
+                  <div className="flex items-center gap-2 text-[10px] text-slate-400 mt-1 flex-wrap">
                     <Badge variant="brand">{article.category.name}</Badge>
                     <span>•</span>
                     <span>By {article.author.name}</span>
@@ -216,8 +216,8 @@ export default async function AdminDashboardPage() {
                 </div>
               </div>
 
-              <div className="text-right shrink-0">
-                <span className="text-sm font-black text-slate-900 flex items-center gap-1 justify-end">
+              <div className="text-right shrink-0 ml-2">
+                <span className="text-xs sm:text-sm font-black text-slate-900 flex items-center gap-1 justify-end">
                   <Eye className="w-3.5 h-3.5 text-[#2791F5]" /> {article.views.toLocaleString()}
                 </span>
                 <span className="text-[10px] text-slate-400">Pageviews</span>
@@ -228,7 +228,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Comprehensive Technical Website Health Audit */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-8 space-y-6 shadow-sm">
+      <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 lg:p-8 space-y-6 shadow-sm">
         <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
           <div className="w-10 h-10 rounded-xl bg-blue-50 text-[#2791F5] flex items-center justify-center font-bold">
             <Zap className="w-5 h-5" />

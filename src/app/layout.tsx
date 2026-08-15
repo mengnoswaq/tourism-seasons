@@ -5,6 +5,7 @@ import "./globals.css";
 import { SessionProvider } from "@/components/providers/session-provider";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { ToastProvider } from "@/components/ui/toast";
+import { GoogleAnalyticsTracker } from "@/components/analytics/google-analytics";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const gaId = process.env.NEXT_PUBLIC_GA_ID || "G-2Z9KP07NG6";
@@ -26,7 +27,7 @@ export const metadata: Metadata = {
     description: "Explore top travel destinations, seasonal recommendations, and tourism insights.",
     siteName: "Tourism Seasons",
     type: "website",
-    },
+  },
 };
 
 export default function RootLayout({
@@ -55,6 +56,7 @@ export default function RootLayout({
         <SessionProvider>
           <QueryProvider>
             <ToastProvider>
+              <GoogleAnalyticsTracker />
               {children}
             </ToastProvider>
           </QueryProvider>

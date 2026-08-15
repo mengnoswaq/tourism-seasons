@@ -15,7 +15,7 @@ export default async function AdminArticlesPage() {
   return (
     <div className="space-y-8">
       
-      <div className="flex items-center justify-between border-b border-slate-200 pb-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 pb-6">
         <div className="flex items-center gap-3">
           <Link href="/admin">
             <Button variant="outline" size="sm" className="p-2 border-slate-200 text-slate-700">
@@ -32,15 +32,16 @@ export default async function AdminArticlesPage() {
           </div>
         </div>
 
-        <Link href="/admin/articles/create">
-          <Button variant="primary" size="sm" className="gap-2 font-bold">
+        <Link href="/admin/articles/create" className="w-full sm:w-auto">
+          <Button variant="primary" size="sm" className="gap-2 font-bold w-full sm:w-auto justify-center">
             <PlusCircle className="w-4 h-4" /> New Article
           </Button>
         </Link>
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-        <table className="w-full text-left text-xs">
+        <div className="overflow-x-auto min-w-full">
+          <table className="w-full text-left text-xs min-w-[700px]">
           <thead className="text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
             <tr>
               <th className="p-4">Title</th>
@@ -81,6 +82,7 @@ export default async function AdminArticlesPage() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
     </div>

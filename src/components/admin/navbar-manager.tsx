@@ -101,7 +101,7 @@ export function NavbarManager({ initialItems }: { initialItems: NavItemData[] })
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
       
       {/* Left Column: Create or Edit Card */}
       <Card className="bg-white border-slate-200 shadow-sm h-fit">
@@ -207,16 +207,16 @@ export function NavbarManager({ initialItems }: { initialItems: NavItemData[] })
       </Card>
 
       {/* Right Column: Existing Navbar Items Table */}
-      <div className="md:col-span-2 bg-white rounded-2xl border border-slate-200 p-6 space-y-4 shadow-sm">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-          <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+      <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 space-y-4 shadow-sm">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
             <Globe className="w-5 h-5 text-[#2791F5]" /> Navbar Items Table ({initialItems.length})
           </h2>
           <span className="text-xs text-slate-500 font-medium">Items marked Active display on top Navbar</span>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+        <div className="overflow-x-auto min-w-full">
+          <table className="w-full text-left text-xs min-w-[550px]">
             <thead className="text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
               <tr>
                 <th className="p-3">Order</th>
