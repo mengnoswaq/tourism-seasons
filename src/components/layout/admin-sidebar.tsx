@@ -55,8 +55,18 @@ export function AdminSidebar() {
             <img
               src="/logo.png"
               alt="Tourism Seasons Admin Dashboard"
-              className={cn("w-auto object-contain transition-all", collapsed ? "h-10" : "h-12")}
+              className="h-10 w-auto object-contain shrink-0"
             />
+            {!collapsed && (
+              <div className="flex flex-col truncate">
+                <span className="font-black text-sm tracking-tight text-slate-900 leading-none">
+                  ADMIN<span className="text-[#2791F5]">PANEL</span>
+                </span>
+                <span className="text-[10px] text-slate-400 font-semibold uppercase mt-0.5 truncate">
+                  Tourism Seasons
+                </span>
+              </div>
+            )}
           </Link>
 
           <button

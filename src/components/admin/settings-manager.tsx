@@ -306,11 +306,22 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
               </span>
               <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  {logoUrl ? (
-                    <img src={logoUrl} alt="Logo Preview" className="h-12 w-auto object-contain" />
-                  ) : (
-                    <span className="font-black text-lg text-slate-900">{siteName}</span>
+                  {logoUrl && (
+                    <img src={logoUrl} alt="Logo Preview" className="h-10 w-auto object-contain" />
                   )}
+                  <div className="flex flex-col">
+                    <span className="font-black text-base tracking-tight text-slate-900 leading-none">
+                      {siteName.toUpperCase().split(" ")[0]}
+                      {siteName.toUpperCase().split(" ").length > 1 && (
+                        <span className="text-[#2791F5]">
+                          {siteName.toUpperCase().split(" ").slice(1).join(" ")}
+                        </span>
+                      )}
+                    </span>
+                    <span className="text-[9px] tracking-widest text-slate-400 font-semibold uppercase mt-0.5">
+                      {siteSubtitle || "Travel & Seasonal Guides"}
+                    </span>
+                  </div>
                 </div>
                 <span className="text-xs text-[#2791F5] font-semibold bg-blue-50 px-2.5 py-1 rounded-lg">
                   Nav Menu
@@ -324,12 +335,15 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
                 Footer Preview (Dark Theme)
               </span>
               <div className="p-5 bg-slate-900 rounded-2xl border border-slate-800 text-white space-y-3">
-                <div className="inline-block bg-white p-2 rounded-xl shadow-md">
-                  {logoUrl ? (
-                    <img src={logoUrl} alt="Footer Logo Preview" className="h-10 w-auto object-contain" />
-                  ) : (
-                    <span className="font-black text-base text-slate-900">{siteName}</span>
-                  )}
+                <div className="flex items-center gap-3">
+                  <div className="bg-white p-2 rounded-xl shadow-md">
+                    {logoUrl && (
+                      <img src={logoUrl} alt="Footer Logo Preview" className="h-8 w-auto object-contain" />
+                    )}
+                  </div>
+                  <span className="font-bold text-base text-white">
+                    {siteName.toUpperCase()}
+                  </span>
                 </div>
                 <p className="text-xs text-slate-400 leading-relaxed">
                   {description || "Discover top travel destinations, seasonal recommendations..."}
