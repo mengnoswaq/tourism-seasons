@@ -24,12 +24,17 @@ export function Footer({ siteSettings }: FooterProps = {}) {
           
           {/* Col 1 */}
           <div className="space-y-4">
-            <Link href="/" className="inline-block bg-white p-2 rounded-xl shadow-md hover:scale-105 transition-transform">
-              <img
-                src={logo}
-                alt={title}
-                className="h-12 w-auto object-contain"
-              />
+            <Link href="/" className="flex items-center gap-3 group">
+              <div className="bg-white p-2 rounded-xl shadow-md group-hover:scale-105 transition-transform">
+                <img
+                  src={logo}
+                  alt={title}
+                  className="h-10 w-auto object-contain"
+                />
+              </div>
+              <span className="font-bold text-lg text-white group-hover:text-[#2791F5] transition-colors">
+                {title.toUpperCase()}
+              </span>
             </Link>
             <p className="text-xs leading-relaxed text-slate-400">
               {desc}

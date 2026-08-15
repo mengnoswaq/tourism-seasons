@@ -48,6 +48,11 @@ export function Navbar({ categories, navItems, headlines, siteSettings }: Navbar
 
   const logoSrc = siteSettings?.logoUrl || "/logo.png";
   const siteTitle = siteSettings?.siteName || "Tourism Seasons";
+  const siteSubtitle = siteSettings?.siteSubtitle || "Travel & Seasonal Guides";
+
+  const titleWords = siteTitle.toUpperCase().split(" ");
+  const firstWord = titleWords[0] || "";
+  const remainingWords = titleWords.slice(1).join("");
 
   return (
     <>
@@ -61,8 +66,17 @@ export function Navbar({ categories, navItems, headlines, siteSettings }: Navbar
               <img
                 src={logoSrc}
                 alt={siteTitle}
-                className="h-14 w-auto object-contain transition-transform group-hover:scale-105"
+                className="h-12 w-auto object-contain transition-transform group-hover:scale-105"
               />
+              <div className="flex flex-col">
+                <span className="font-black text-xl tracking-tight text-slate-900 leading-none">
+                  {firstWord}
+                  {remainingWords && <span className="text-[#2791F5]">{remainingWords}</span>}
+                </span>
+                <span className="text-[10px] tracking-widest text-slate-400 font-semibold uppercase mt-0.5">
+                  {siteSubtitle}
+                </span>
+              </div>
             </Link>
 
             {/* Search Input */}
