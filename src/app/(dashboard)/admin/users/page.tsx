@@ -103,6 +103,8 @@ export default async function AdminUsersPage() {
             <tbody className="divide-y divide-slate-100">
               {users.map((user) => {
                 const isSelf = user.id === currentUserId;
+                const isTargetSuperAdmin = user.role === "SUPERADMIN";
+                const isProtected = isSelf || (isTargetSuperAdmin && currentUserRole !== "SUPERADMIN");
                 const isActive = user.status !== "INACTIVE";
 
                 return (
@@ -124,7 +126,7 @@ export default async function AdminUsersPage() {
                         "use server";
                         await toggleUserActiveStatus(user.id);
                       }}>
-                        <button type="submit" disabled={isSelf} className="cursor-pointer disabled:cursor-not-allowed">
+                        <button type="submit" disabled={isProtected} className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">
                           {isActive ? (
                             <Badge variant="success" className="gap-1 cursor-pointer">
                               <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Active
@@ -157,10 +159,10 @@ export default async function AdminUsersPage() {
                         <select
                           name="role"
                           defaultValue={user.role}
-                          disabled={isSelf}
-                          className="bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#2791F5] disabled:opacity-50"
+                          disabled={isProtected}
+                          className="bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#2791F5] disabled:opacity-50 disabled:bg-slate-100"
                         >
-                          <option value="SUPERADMIN">SUPERADMIN</option>
+                          {currentUserRole === "SUPERADMIN" && <option value="SUPERADMIN">SUPERADMIN</option>}
                           <option value="ADMIN">ADMIN</option>
                           <option value="EDITOR">EDITOR</option>
                           <option value="AUTHOR">AUTHOR</option>
@@ -170,8 +172,8 @@ export default async function AdminUsersPage() {
                           variant="primary"
                           size="sm"
                           type="submit"
-                          disabled={isSelf}
-                          className="py-1 text-[11px] font-semibold"
+                          disabled={isProtected}
+                          className="py-1 text-[11px] font-semibold disabled:opacity-50"
                         >
                           Save Role
                         </Button>

@@ -58,6 +58,11 @@ export async function toggleUserActiveStatus(targetUserId: string): Promise<ApiR
     return { success: false, error: "User not found." };
   }
 
+  // Security check: Only SUPERADMIN can modify a SUPERADMIN user's status
+  if (existing.role === "SUPERADMIN" && currentRole !== "SUPERADMIN") {
+    return { success: false, error: "Permission denied. Only a Super Admin can modify a Super Admin's status." };
+  }
+
   const newStatus = existing.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
 
   await prisma.user.update({
@@ -90,6 +95,21 @@ export async function updateUserRole(targetUserId: string, newRole: string): Pro
 
   if (targetUserId === currentUserId && newRole !== currentRole) {
     return { success: false, error: "You cannot modify your own role." };
+  }
+
+  const existing = await prisma.user.findUnique({ where: { id: targetUserId } });
+  if (!existing) {
+    return { success: false, error: "User not found." };
+  }
+
+  // Security check: Only SUPERADMIN can modify a SUPERADMIN user's role
+  if (existing.role === "SUPERADMIN" && currentRole !== "SUPERADMIN") {
+    return { success: false, error: "Permission denied. Only a Super Admin can modify a Super Admin's role." };
+  }
+
+  // Security check: Only SUPERADMIN can assign the SUPERADMIN role
+  if (newRole === "SUPERADMIN" && currentRole !== "SUPERADMIN") {
+    return { success: false, error: "Permission denied. Only a Super Admin can assign the Super Admin role." };
   }
 
   await prisma.user.update({
