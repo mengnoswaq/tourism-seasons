@@ -58,9 +58,9 @@ export async function toggleUserActiveStatus(targetUserId: string): Promise<ApiR
     return { success: false, error: "User not found." };
   }
 
-  // Security check: Only SUPERADMIN can modify a SUPERADMIN user's status
-  if (existing.role === "SUPERADMIN" && currentRole !== "SUPERADMIN") {
-    return { success: false, error: "Permission denied. Only a Super Admin can modify a Super Admin's status." };
+  // Security check: Only SUPERADMIN can modify a SUPERADMIN or ADMIN user's status
+  if ((existing.role === "SUPERADMIN" || existing.role === "ADMIN") && currentRole !== "SUPERADMIN") {
+    return { success: false, error: "Permission denied. Only a Super Admin can modify an Admin or Super Admin status." };
   }
 
   const newStatus = existing.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
@@ -102,14 +102,14 @@ export async function updateUserRole(targetUserId: string, newRole: string): Pro
     return { success: false, error: "User not found." };
   }
 
-  // Security check: Only SUPERADMIN can modify a SUPERADMIN user's role
-  if (existing.role === "SUPERADMIN" && currentRole !== "SUPERADMIN") {
-    return { success: false, error: "Permission denied. Only a Super Admin can modify a Super Admin's role." };
+  // Security check: Only SUPERADMIN can modify a SUPERADMIN or ADMIN user's role
+  if ((existing.role === "SUPERADMIN" || existing.role === "ADMIN") && currentRole !== "SUPERADMIN") {
+    return { success: false, error: "Permission denied. Only a Super Admin can modify an Admin or Super Admin role." };
   }
 
-  // Security check: Only SUPERADMIN can assign the SUPERADMIN role
-  if (newRole === "SUPERADMIN" && currentRole !== "SUPERADMIN") {
-    return { success: false, error: "Permission denied. Only a Super Admin can assign the Super Admin role." };
+  // Security check: Only SUPERADMIN can assign SUPERADMIN or ADMIN role
+  if ((newRole === "SUPERADMIN" || newRole === "ADMIN") && currentRole !== "SUPERADMIN") {
+    return { success: false, error: "Permission denied. Only a Super Admin can grant Admin or Super Admin role." };
   }
 
   await prisma.user.update({

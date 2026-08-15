@@ -103,8 +103,8 @@ export default async function AdminUsersPage() {
             <tbody className="divide-y divide-slate-100">
               {users.map((user) => {
                 const isSelf = user.id === currentUserId;
-                const isTargetSuperAdmin = user.role === "SUPERADMIN";
-                const isProtected = isSelf || (isTargetSuperAdmin && currentUserRole !== "SUPERADMIN");
+                const isTargetAdminOrSuperAdmin = user.role === "SUPERADMIN" || user.role === "ADMIN";
+                const isProtected = isSelf || (isTargetAdminOrSuperAdmin && currentUserRole !== "SUPERADMIN");
                 const isActive = user.status !== "INACTIVE";
 
                 return (
@@ -162,8 +162,12 @@ export default async function AdminUsersPage() {
                           disabled={isProtected}
                           className="bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#2791F5] disabled:opacity-50 disabled:bg-slate-100"
                         >
-                          {currentUserRole === "SUPERADMIN" && <option value="SUPERADMIN">SUPERADMIN</option>}
-                          <option value="ADMIN">ADMIN</option>
+                          {currentUserRole === "SUPERADMIN" && (
+                            <>
+                              <option value="SUPERADMIN">SUPERADMIN</option>
+                              <option value="ADMIN">ADMIN</option>
+                            </>
+                          )}
                           <option value="EDITOR">EDITOR</option>
                           <option value="AUTHOR">AUTHOR</option>
                           <option value="USER">USER</option>
