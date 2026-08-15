@@ -6,8 +6,8 @@ export const runtime = "edge";
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const title = searchParams.get("title") || "Global Chronicle - Breaking News";
-    const category = searchParams.get("category") || "Headlines";
+    const title = searchParams.get("title") || "Tourism Seasons - Travel & Guides";
+    const category = searchParams.get("category") || "Destinations";
 
     return new ImageResponse(
       (
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
                 width: "48px",
                 height: "48px",
                 borderRadius: "12px",
-                backgroundColor: "#2563eb",
+                backgroundColor: "#2791F5",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -40,18 +40,18 @@ export async function GET(req: NextRequest) {
                 fontSize: "24px",
               }}
             >
-              GC
+              TS
             </div>
             <span style={{ fontSize: "24px", fontWeight: "900", letterSpacing: "1px" }}>
-              GLOBAL CHRONICLE
+              TOURISM SEASONS
             </span>
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             <div
               style={{
-                backgroundColor: "rgba(37, 99, 235, 0.2)",
-                border: "1px solid rgba(37, 99, 235, 0.5)",
+                backgroundColor: "rgba(39, 145, 245, 0.2)",
+                border: "1px solid rgba(39, 145, 245, 0.5)",
                 color: "#60a5fa",
                 padding: "6px 16px",
                 borderRadius: "20px",
@@ -88,8 +88,8 @@ export async function GET(req: NextRequest) {
               color: "#94a3b8",
             }}
           >
-            <span>Trusted Independent Media</span>
-            <span>globalchronicle.news</span>
+            <span>Tourism &amp; Travel Guides</span>
+            <span>tourismseasons.com</span>
           </div>
         </div>
       ),

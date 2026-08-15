@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-const SITE_NAME = "Global Chronicle";
+const SITE_NAME = "Tourism Seasons";
 
 export interface ArticleSeoInput {
   title: string;

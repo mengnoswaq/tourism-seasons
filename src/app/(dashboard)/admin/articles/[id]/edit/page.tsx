@@ -11,12 +11,15 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Upload, CheckCircle, Edit3 } from "lucide-react";
 
+import { useToast } from "@/components/ui/toast";
+
 interface EditArticlePageProps {
   params: { id: string };
 }
 
 export default function EditArticlePage({ params }: EditArticlePageProps) {
   const router = useRouter();
+  const toast = useToast();
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [article, setArticle] = useState<any>(null);
   const [coverImageUrl, setCoverImageUrl] = useState("");
@@ -28,6 +31,8 @@ export default function EditArticlePage({ params }: EditArticlePageProps) {
   const [isGalleryUploading, setIsGalleryUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
   useEffect(() => {
     getCategories().then((data) => setCategories(data));
@@ -57,7 +62,7 @@ export default function EditArticlePage({ params }: EditArticlePageProps) {
       const url = await uploadImage(file);
       setCoverImageUrl(url);
     } catch (err) {
-      alert("Failed to upload image.");
+      alert("Failed to process cover image.");
     } finally {
       setIsUploading(false);
     }
@@ -93,8 +98,42 @@ export default function EditArticlePage({ params }: EditArticlePageProps) {
     setNewGalleryCaption("");
   };
 
+  const moveGalleryImage = (fromIndex: number, toIndex: number) => {
+    if (toIndex < 0 || toIndex >= galleryImages.length) return;
+    setGalleryImages((prev) => {
+      const updated = [...prev];
+      const [moved] = updated.splice(fromIndex, 1);
+      updated.splice(toIndex, 0, moved);
+      return updated;
+    });
+  };
+
   const removeGalleryImage = (index: number) => {
     setGalleryImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Mouse Drag and Drop Reordering Handlers
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === dropIndex) return;
+
+    setGalleryImages((prev) => {
+      const updated = [...prev];
+      const [draggedItem] = updated.splice(draggedIndex, 1);
+      updated.splice(dropIndex, 0, draggedItem);
+      return updated;
+    });
+    setDraggedIndex(null);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -112,10 +151,12 @@ export default function EditArticlePage({ params }: EditArticlePageProps) {
     const res = await updateArticle(params.id, formData);
 
     if (res.success) {
+      toast.success("Article updated successfully!", "Article Updated");
       router.push("/admin/articles");
       router.refresh();
     } else {
       setError(res.error || "Failed to update article.");
+      toast.error(res.error || "Failed to update article.", "Update Error");
     }
     setIsSubmitting(false);
   };
@@ -230,11 +271,6 @@ export default function EditArticlePage({ params }: EditArticlePageProps) {
                   <Upload className="w-4 h-4 text-[#2791F5]" /> {isUploading ? "Uploading..." : "Upload New Cover"}
                   <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
                 </label>
-                {coverImageUrl && (
-                  <span className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
-                    <CheckCircle className="w-4 h-4" /> Cover image set
-                  </span>
-                )}
               </div>
               {coverImageUrl && (
                 <div className="mt-2 h-32 w-64 rounded-xl overflow-hidden border border-slate-200">
@@ -270,7 +306,7 @@ export default function EditArticlePage({ params }: EditArticlePageProps) {
             </div>
 
             {/* Article Multi-Image Gallery Manager */}
-            <div className="space-y-3 pt-2 border-t border-slate-100">
+            <div className="space-y-4 pt-2 border-t border-slate-100">
               <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
                 Article Photo Gallery (Multiple Images)
               </label>
@@ -309,27 +345,62 @@ export default function EditArticlePage({ params }: EditArticlePageProps) {
                 </div>
               </div>
 
-              {/* Gallery Image List Preview */}
+              {/* 3-Column Mouse Drag & Drop Reorderable Gallery Grid */}
               {galleryImages.length > 0 && (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pt-2">
-                  {galleryImages.map((img, idx) => (
-                    <div key={idx} className="relative group rounded-xl overflow-hidden border border-slate-200 bg-white shadow-xs p-2 space-y-2">
-                      <div className="h-28 rounded-lg overflow-hidden relative">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={img.url} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => removeGalleryImage(idx)}
-                          className="absolute top-1 right-1 bg-red-600 text-white text-xs w-6 h-6 rounded-full flex items-center justify-center font-bold hover:bg-red-700 shadow-md"
-                        >
-                          ✕
-                        </button>
+                <div className="space-y-2 pt-2">
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-700">
+                    <span>Reorder Gallery Images ({galleryImages.length})</span>
+                    <span className="text-[11px] text-slate-400 font-normal">Drag image cards with mouse to reorder position</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {galleryImages.map((img, idx) => (
+                      <div
+                        key={idx}
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, idx)}
+                        onDragOver={handleDragOver}
+                        onDrop={(e) => handleDrop(e, idx)}
+                        className={`relative group rounded-xl overflow-hidden border bg-white shadow-xs p-3 space-y-2.5 flex flex-col justify-between cursor-grab active:cursor-grabbing transition-all ${
+                          draggedIndex === idx ? "opacity-40 border-dashed border-[#2791F5] bg-blue-50" : "border-slate-200 hover:border-[#2791F5]/50"
+                        }`}
+                      >
+                        <div className="relative w-full rounded-lg overflow-hidden bg-slate-100 flex items-center justify-center p-1">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={img.url} alt={`Gallery ${idx + 1}`} className="w-full h-40 object-contain block pointer-events-none" />
+                          
+                          {/* Position Badge */}
+                          <span className="absolute top-2 left-2 bg-slate-900/90 text-white text-[11px] font-black px-2 py-0.5 rounded-md shadow-md border border-white/20">
+                            #{idx + 1}
+                          </span>
+
+                          {/* Remove Control */}
+                          <button
+                            type="button"
+                            onClick={() => removeGalleryImage(idx)}
+                            className="absolute top-2 right-2 bg-white/95 text-red-600 hover:bg-red-600 hover:text-white text-xs w-7 h-7 rounded-lg flex items-center justify-center font-bold shadow-md border border-slate-200 transition-colors"
+                            title="Remove Image"
+                          >
+                            ✕
+                          </button>
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold uppercase text-slate-400">Caption / Label</label>
+                          <input
+                            type="text"
+                            value={img.caption || ""}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setGalleryImages((prev) => prev.map((item, i) => (i === idx ? { ...item, caption: val } : item)));
+                            }}
+                            placeholder="Add caption..."
+                            className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#2791F5]"
+                          />
+                        </div>
                       </div>
-                      <p className="text-[11px] text-slate-600 truncate font-medium px-1">
-                        {img.caption || `Image #${idx + 1}`}
-                      </p>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

@@ -14,9 +14,12 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import { User, Upload, ShieldCheck, Mail, Trash2 } from "lucide-react";
 
+import { useToast } from "@/components/ui/toast";
+
 export default function ProfilePage() {
   const { data: session, status, update: updateSession } = useSession();
   const router = useRouter();
+  const toast = useToast();
 
   const [categories, setCategories] = useState<{ id: string; name: string; slug: string }[]>([]);
   const [navItems, setNavItems] = useState<{ id: string; label: string; url: string }[]>([]);
@@ -85,8 +88,9 @@ export default function ProfilePage() {
     try {
       const url = await uploadImage(file);
       setImageUrl(url);
+      toast.success("Profile picture updated!", "Avatar Changed");
     } catch (err) {
-      alert("Failed to upload profile picture.");
+      toast.error("Failed to process profile picture.", "Upload Error");
     } finally {
       setIsUploading(false);
     }
@@ -94,6 +98,7 @@ export default function ProfilePage() {
 
   const handleRemoveImage = () => {
     setImageUrl("");
+    toast.info("Profile picture removed.", "Avatar Removed");
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -111,10 +116,12 @@ export default function ProfilePage() {
 
     if (res.success) {
       setMessage({ text: "Profile details updated successfully!", isError: false });
+      toast.success("Profile details updated successfully!", "Profile Saved");
       await updateSession({ name, image: imageUrl || null });
       router.refresh();
     } else {
       setMessage({ text: res.error || "Failed to update profile.", isError: true });
+      toast.error(res.error || "Failed to update profile.", "Update Error");
     }
     setIsSubmitting(false);
   };

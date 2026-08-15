@@ -48,21 +48,13 @@ export function AdminSidebar() {
     >
       <div>
         {/* Sidebar Header */}
-        <div className="h-20 flex items-center justify-between px-5 border-b border-slate-100">
+        <div className="h-20 flex items-center justify-between px-4 border-b border-slate-100">
           <Link href="/admin" className="flex items-center gap-3 overflow-hidden">
-            <div className="w-10 h-10 rounded-xl bg-[#2791F5] text-white flex items-center justify-center font-black text-xl shrink-0 shadow-md shadow-[#2791F5]/30">
-              TS
-            </div>
-            {!collapsed && (
-              <div className="flex flex-col">
-                <span className="font-black text-sm tracking-tight text-slate-900 leading-none">
-                  ADMIN<span className="text-[#2791F5]">PANEL</span>
-                </span>
-                <span className="text-[10px] text-slate-400 font-semibold uppercase mt-0.5">
-                  Global Chronicle
-                </span>
-              </div>
-            )}
+            <img
+              src="/logo.png"
+              alt="Tourism Seasons Admin Dashboard"
+              className={cn("w-auto object-contain transition-all", collapsed ? "h-10" : "h-12")}
+            />
           </Link>
 
           <button

@@ -39,12 +39,16 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
       <Card className="max-w-md w-full shadow-2xl border-slate-200">
         <CardHeader className="text-center space-y-2">
-          <div className="mx-auto w-12 h-12 rounded-2xl bg-[#2791F5] flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-[#2791F5]/30">
-            GC
-          </div>
+          <Link href="/" className="mx-auto inline-block hover:scale-105 transition-transform">
+            <img
+              src="/logo.png"
+              alt="Tourism Seasons Logo"
+              className="h-16 w-auto object-contain mx-auto"
+            />
+          </Link>
           <CardTitle className="text-2xl font-black">Create Account</CardTitle>
           <CardDescription>
-            Join Global Chronicle to read, comment, and engage with top journalism
+            Join Tourism Seasons to read, comment, and engage with top travel guides
           </CardDescription>
         </CardHeader>
 

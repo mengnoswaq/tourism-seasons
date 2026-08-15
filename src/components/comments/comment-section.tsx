@@ -9,6 +9,8 @@ import { formatDate } from "@/lib/utils";
 import { addComment } from "@/actions/comments";
 import { CommentWithAuthor } from "@/types";
 
+import { useToast } from "@/components/ui/toast";
+
 interface CommentSectionProps {
   articleId: string;
   initialComments: CommentWithAuthor[];
@@ -16,6 +18,7 @@ interface CommentSectionProps {
 
 export function CommentSection({ articleId, initialComments }: CommentSectionProps) {
   const { data: session } = useSession();
+  const toast = useToast();
   const [comments, setComments] = useState<CommentWithAuthor[]>(initialComments);
   const [mainContent, setMainContent] = useState("");
   const [replyingToId, setReplyingToId] = useState<string | null>(null);
@@ -30,6 +33,7 @@ export function CommentSection({ articleId, initialComments }: CommentSectionPro
     const res = await addComment(articleId, text, parentId);
 
     if (res.success && res.data) {
+      toast.success(parentId ? "Reply posted successfully!" : "Comment posted successfully!", "Comment Published");
       if (parentId) {
         setReplyContent("");
         setReplyingToId(null);
@@ -39,7 +43,7 @@ export function CommentSection({ articleId, initialComments }: CommentSectionPro
       // Optimistic refresh
       window.location.reload();
     } else {
-      alert(res.error || "Failed to post comment");
+      toast.error(res.error || "Failed to post comment", "Comment Error");
     }
     setIsSubmitting(false);
   };

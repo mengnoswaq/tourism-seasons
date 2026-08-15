@@ -45,12 +45,16 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4">
       <Card className="max-w-md w-full shadow-2xl border-slate-200 dark:border-slate-800">
         <CardHeader className="text-center space-y-2">
-          <div className="mx-auto w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-blue-500/30">
-            GC
-          </div>
+          <Link href="/" className="mx-auto inline-block hover:scale-105 transition-transform">
+            <img
+              src="/logo.png"
+              alt="Tourism Seasons Logo"
+              className="h-16 w-auto object-contain mx-auto"
+            />
+          </Link>
           <CardTitle className="text-2xl font-black">Welcome Back</CardTitle>
           <CardDescription>
-            Sign in to access your Global Chronicle account and dashboard
+            Sign in to access your Tourism Seasons account and dashboard
           </CardDescription>
         </CardHeader>
 

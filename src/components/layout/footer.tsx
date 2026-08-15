@@ -10,12 +10,13 @@ export function Footer() {
           
           {/* Col 1 */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-[#2791F5] flex items-center justify-center text-white font-black text-lg">
-                TS
-              </div>
-              <span className="font-bold text-lg text-white">TOURISM SEASONS</span>
-            </div>
+            <Link href="/" className="inline-block bg-white p-2 rounded-xl shadow-md hover:scale-105 transition-transform">
+              <img
+                src="/logo.png"
+                alt="Tourism Seasons - រដូវកាលទេសចរណ៍"
+                className="h-12 w-auto object-contain"
+              />
+            </Link>
             <p className="text-xs leading-relaxed text-slate-400">
               Discover top travel destinations, seasonal vacation recommendations, local culture, and tourism insights across the world.
             </p>

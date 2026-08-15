@@ -130,9 +130,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
             {/* Featured Cover Image */}
             {article.coverImage && (
-              <div className="rounded-2xl overflow-hidden shadow-xl border border-slate-200/80 dark:border-slate-800 bg-white">
+              <div className="max-w-[600px] mx-auto rounded-2xl overflow-hidden shadow-xl border border-slate-200/80 dark:border-slate-800 bg-white">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={article.coverImage} alt={article.title} className="w-full h-auto object-cover max-h-[550px]" />
+                <img src={article.coverImage} alt={article.title} className="w-full h-auto object-contain block" />
               </div>
             )}
 
@@ -179,23 +179,23 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                   <span className="text-xs text-slate-400 font-semibold">{article.images.length} High-Res Photos</span>
                 </div>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full">
+                <div className="flex flex-col gap-6 w-full">
                   {article.images.map((img: any, index: number) => (
                     <div
                       key={img.id || index}
-                      className="group relative rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm hover:shadow-md hover:border-[#2791F5]/40 transition-all duration-300 flex flex-col justify-between"
+                      className="max-w-[600px] w-full mx-auto group relative rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm hover:shadow-md hover:border-[#2791F5]/40 transition-all duration-300 flex flex-col"
                     >
-                      <div className="aspect-video w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
+                      <div className="w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={img.url}
                           alt={img.caption || `${article.title} - Photo ${index + 1}`}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="w-full h-auto object-contain block group-hover:scale-[1.01] transition-transform duration-300"
                         />
                       </div>
                       {img.caption && (
-                        <div className="p-3 bg-slate-50/90 dark:bg-slate-900/90 border-t border-slate-100 dark:border-slate-800">
-                          <p className="text-xs text-slate-600 dark:text-slate-400 font-medium leading-relaxed line-clamp-2">
+                        <div className="p-4 bg-slate-50/90 dark:bg-slate-900/90 border-t border-slate-100 dark:border-slate-800">
+                          <p className="text-sm text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
                             {img.caption}
                           </p>
                         </div>

@@ -2,10 +2,9 @@ import React from "react";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/utils";
-import { PlusCircle, Trash2, ExternalLink, ArrowLeft, Newspaper, Sparkles, CheckCircle2, XCircle, Edit3 } from "lucide-react";
-import { deleteArticle, toggleArticlePublishedStatus, toggleArticleFeaturedStatus } from "@/actions/articles";
+import { PlusCircle, ArrowLeft, Newspaper } from "lucide-react";
+import { ArticlePublishToggle, ArticleFeaturedToggle, ArticleRowActions } from "@/components/admin/article-actions";
 
 export default async function AdminArticlesPage() {
   const articles = await prisma.article.findMany({
@@ -64,75 +63,19 @@ export default async function AdminArticlesPage() {
                 
                 {/* Active / Inactive Status Toggle */}
                 <td className="p-4 text-center">
-                  <form action={async () => {
-                    "use server";
-                    await toggleArticlePublishedStatus(article.id);
-                  }}>
-                    <button type="submit" className="group cursor-pointer">
-                      {article.published ? (
-                        <Badge variant="success" className="gap-1 cursor-pointer hover:bg-emerald-100 transition-colors">
-                          <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Active (Published)
-                        </Badge>
-                      ) : (
-                        <Badge variant="default" className="gap-1 cursor-pointer hover:bg-slate-200 transition-colors">
-                          <XCircle className="w-3 h-3 text-slate-400" /> Inactive (Draft)
-                        </Badge>
-                      )}
-                    </button>
-                  </form>
+                  <ArticlePublishToggle articleId={article.id} published={article.published} />
                 </td>
 
                 {/* Featured Status Toggle */}
                 <td className="p-4 text-center">
-                  <form action={async () => {
-                    "use server";
-                    await toggleArticleFeaturedStatus(article.id);
-                  }}>
-                    <button type="submit" className="group cursor-pointer">
-                      {article.featured ? (
-                        <Badge variant="brand" className="gap-1 bg-[#2791F5] text-white border-none cursor-pointer">
-                          <Sparkles className="w-3 h-3" /> Featured
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline" className="gap-1 text-slate-400 border-slate-200 cursor-pointer hover:border-[#2791F5]">
-                          Regular
-                        </Badge>
-                      )}
-                    </button>
-                  </form>
+                  <ArticleFeaturedToggle articleId={article.id} featured={article.featured} />
                 </td>
 
                 <td className="p-4 text-slate-500">{formatDate(article.createdAt)}</td>
                 
                 {/* Icon-Only Action Buttons: Preview, Edit, Delete */}
                 <td className="p-4 text-right">
-                  <div className="flex items-center justify-end gap-1.5">
-                    
-                    {/* Preview Icon Button */}
-                    <Link href={`/articles/${article.slug}`} target="_blank">
-                      <Button variant="ghost" size="sm" className="w-8 h-8 p-0 rounded-lg text-slate-500 hover:text-[#2791F5] hover:bg-blue-50" title="Preview Story">
-                        <ExternalLink className="w-4 h-4" />
-                      </Button>
-                    </Link>
-
-                    {/* Edit Article Icon Button */}
-                    <Link href={`/admin/articles/${article.id}/edit`}>
-                      <Button variant="outline" size="sm" className="w-8 h-8 p-0 rounded-lg border-blue-200 text-[#2791F5] hover:bg-blue-50" title="Edit Article">
-                        <Edit3 className="w-4 h-4" />
-                      </Button>
-                    </Link>
-
-                    {/* Delete Article Icon Button */}
-                    <form action={async () => {
-                      "use server";
-                      await deleteArticle(article.id);
-                    }} className="inline-block">
-                      <Button variant="danger" size="sm" type="submit" className="w-8 h-8 p-0 rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 shadow-none" title="Delete Article">
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </form>
-
-                  </div>
+                  <ArticleRowActions articleId={article.id} slug={article.slug} title={article.title} />
                 </td>
               </tr>
             ))}
