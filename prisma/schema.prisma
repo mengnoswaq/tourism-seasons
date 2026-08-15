@@ -134,3 +134,13 @@ model NavItem {
   updatedAt DateTime @updatedAt
 }
 
+model SiteSetting {
+  id           String   @id @default("default")
+  siteName     String   @default("Tourism Seasons")
+  siteSubtitle String   @default("Travel & Seasonal Guides")
+  logoUrl      String?  @default("/logo.png")
+  logoKhmerUrl String?  @default("/logo-khmer.png")
+  description  String?  @default("Discover top travel destinations, seasonal vacation recommendations, local culture, and tourism insights across the world.")
+  updatedAt    DateTime @updatedAt
+}
+

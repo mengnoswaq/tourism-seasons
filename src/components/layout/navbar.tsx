@@ -14,9 +14,15 @@ interface NavbarProps {
   categories: { id: string; name: string; slug: string }[];
   navItems?: { id: string; label: string; url: string }[];
   headlines?: (string | { title: string; slug?: string })[];
+  siteSettings?: {
+    siteName?: string;
+    siteSubtitle?: string | null;
+    logoUrl?: string | null;
+    logoKhmerUrl?: string | null;
+  };
 }
 
-export function Navbar({ categories, navItems, headlines }: NavbarProps) {
+export function Navbar({ categories, navItems, headlines, siteSettings }: NavbarProps) {
   const { data: session } = useSession();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
@@ -40,6 +46,9 @@ export function Navbar({ categories, navItems, headlines }: NavbarProps) {
         ...categories.map((cat) => ({ id: cat.id, label: cat.name, url: `/category/${cat.slug}` })),
       ];
 
+  const logoSrc = siteSettings?.logoUrl || "/logo.png";
+  const siteTitle = siteSettings?.siteName || "Tourism Seasons";
+
   return (
     <>
       <NewsTicker headlines={headlines} />
@@ -50,8 +59,8 @@ export function Navbar({ categories, navItems, headlines }: NavbarProps) {
             {/* Logo */}
             <Link href="/" className="flex items-center gap-3 group py-1">
               <img
-                src="/logo.png"
-                alt="Tourism Seasons - រដូវកាលទេសចរណ៍"
+                src={logoSrc}
+                alt={siteTitle}
                 className="h-14 w-auto object-contain transition-transform group-hover:scale-105"
               />
             </Link>

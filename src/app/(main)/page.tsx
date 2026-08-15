@@ -2,6 +2,7 @@ import React from "react";
 import { getPublishedArticles } from "@/actions/articles";
 import { getCategories } from "@/actions/categories";
 import { getNavItems } from "@/actions/navbar";
+import { getSiteSettings } from "@/actions/settings";
 import { NewsTicker } from "@/components/layout/ticker";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
@@ -13,10 +14,11 @@ import { Flame, Newspaper } from "lucide-react";
 export const revalidate = 60; // Incremental Static Regeneration (ISR) every 60 seconds
 
 export default async function HomePage() {
-  const [categories, navItems, { articles }] = await Promise.all([
+  const [categories, navItems, { articles }, { settings }] = await Promise.all([
     getCategories(),
     getNavItems(),
     getPublishedArticles({ limit: 12 }),
+    getSiteSettings(),
   ]);
 
   const featuredArticle = articles.find((a) => a.featured) || articles[0];
@@ -26,7 +28,7 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50/50">
-      <Navbar categories={categories} navItems={navItems} headlines={headlines} />
+      <Navbar categories={categories} navItems={navItems} headlines={headlines} siteSettings={settings} />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
         
@@ -65,7 +67,7 @@ export default async function HomePage() {
 
       </main>
 
-      <Footer />
+      <Footer siteSettings={settings} />
     </div>
   );
 }

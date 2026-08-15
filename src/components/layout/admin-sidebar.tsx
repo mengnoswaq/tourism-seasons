@@ -15,6 +15,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Menu,
+  Settings,
 } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
@@ -33,6 +34,7 @@ export function AdminSidebar() {
     { label: "Navbar Menu", href: "/admin/navbar", icon: Menu, roles: ["SUPERADMIN", "ADMIN"] },
     { label: "Categories", href: "/admin/categories", icon: Folder },
     { label: "User Roles", href: "/admin/users", icon: Users, roles: ["SUPERADMIN", "ADMIN"] },
+    { label: "Site Settings", href: "/admin/settings", icon: Settings, roles: ["SUPERADMIN", "ADMIN"] },
   ];
 
   const filteredNavItems = navItems.filter(

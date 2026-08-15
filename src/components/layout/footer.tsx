@@ -2,7 +2,21 @@ import React from "react";
 import Link from "next/link";
 import { Globe, ShieldCheck, Mail, Rss } from "lucide-react";
 
-export function Footer() {
+interface FooterProps {
+  siteSettings?: {
+    siteName?: string;
+    description?: string | null;
+    logoUrl?: string | null;
+  };
+}
+
+export function Footer({ siteSettings }: FooterProps = {}) {
+  const logo = siteSettings?.logoUrl || "/logo.png";
+  const title = siteSettings?.siteName || "Tourism Seasons";
+  const desc =
+    siteSettings?.description ||
+    "Discover top travel destinations, seasonal vacation recommendations, local culture, and tourism insights across the world.";
+
   return (
     <footer className="bg-slate-900 text-slate-400 border-t border-slate-800 pt-16 pb-12 mt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -12,13 +26,13 @@ export function Footer() {
           <div className="space-y-4">
             <Link href="/" className="inline-block bg-white p-2 rounded-xl shadow-md hover:scale-105 transition-transform">
               <img
-                src="/logo.png"
-                alt="Tourism Seasons - រដូវកាលទេសចរណ៍"
+                src={logo}
+                alt={title}
                 className="h-12 w-auto object-contain"
               />
             </Link>
             <p className="text-xs leading-relaxed text-slate-400">
-              Discover top travel destinations, seasonal vacation recommendations, local culture, and tourism insights across the world.
+              {desc}
             </p>
           </div>
 
