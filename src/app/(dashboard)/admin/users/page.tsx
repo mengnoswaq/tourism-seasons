@@ -104,7 +104,8 @@ export default async function AdminUsersPage() {
               {users.map((user) => {
                 const isSelf = user.id === currentUserId;
                 const isTargetAdminOrSuperAdmin = user.role === "SUPERADMIN" || user.role === "ADMIN";
-                const isProtected = isSelf || (isTargetAdminOrSuperAdmin && currentUserRole !== "SUPERADMIN");
+                // SuperAdmins can edit ALL user accounts (isProtected is false for SUPERADMIN)
+                const isProtected = currentUserRole === "SUPERADMIN" ? false : (isSelf || isTargetAdminOrSuperAdmin);
                 const isActive = user.status !== "INACTIVE";
 
                 return (
