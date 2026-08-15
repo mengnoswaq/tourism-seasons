@@ -6,6 +6,20 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("Seeding local database...");
 
+  // 0. Create Default Site Settings
+  await prisma.siteSetting.upsert({
+    where: { id: "default" },
+    update: {},
+    create: {
+      id: "default",
+      siteName: "Tourism Seasons",
+      siteSubtitle: "Travel & Seasonal Guides",
+      logoUrl: "/logo.png",
+      logoKhmerUrl: "/logo-khmer.png",
+      description: "Discover top travel destinations, seasonal vacation recommendations, local culture, and tourism insights across the world.",
+    },
+  });
+
   // 1. Create Default Categories
   const categories = [
     { name: "Technology", slug: "technology", description: "Latest tech news, AI, gadget updates, and software engineering." },
