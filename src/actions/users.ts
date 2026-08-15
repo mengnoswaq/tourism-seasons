@@ -49,6 +49,10 @@ export async function toggleUserActiveStatus(targetUserId: string): Promise<ApiR
     return { success: false, error: "Permission denied. Only Super Admin or Admin can modify user status." };
   }
 
+  if (targetUserId === currentUserId) {
+    return { success: false, error: "You cannot deactivate your own account." };
+  }
+
   const existing = await prisma.user.findUnique({ where: { id: targetUserId } });
   if (!existing) {
     return { success: false, error: "User not found." };
@@ -56,9 +60,6 @@ export async function toggleUserActiveStatus(targetUserId: string): Promise<ApiR
 
   // Security check: Only SUPERADMIN can modify SUPERADMIN or ADMIN user status
   if (currentRole !== "SUPERADMIN") {
-    if (targetUserId === currentUserId) {
-      return { success: false, error: "You cannot deactivate your own account." };
-    }
     if (existing.role === "SUPERADMIN" || existing.role === "ADMIN") {
       return { success: false, error: "Permission denied. Only a Super Admin can modify an Admin or Super Admin status." };
     }
@@ -83,6 +84,7 @@ export async function updateUserRole(targetUserId: string, newRole: string): Pro
   }
 
   const currentRole = (session.user as any).role as string;
+  const currentUserId = (session.user as any).id;
 
   if (!hasPermission(currentRole, ["SUPERADMIN", "ADMIN"])) {
     return { success: false, error: "Permission denied. Only Super Admin or Admin can modify roles." };
@@ -93,18 +95,22 @@ export async function updateUserRole(targetUserId: string, newRole: string): Pro
     return { success: false, error: "Invalid role specified." };
   }
 
+  if (targetUserId === currentUserId && newRole !== currentRole) {
+    return { success: false, error: "You cannot modify your own role." };
+  }
+
   const existing = await prisma.user.findUnique({ where: { id: targetUserId } });
   if (!existing) {
     return { success: false, error: "User not found." };
   }
 
-  // Security check: Non-SUPERADMINs cannot modify ADMIN/SUPERADMIN roles or assign SUPERADMIN/ADMIN roles
+  // Security check: Non-SUPERADMINs cannot modify ADMIN/SUPERADMIN roles or assign SUPERADMIN role
   if (currentRole !== "SUPERADMIN") {
     if (existing.role === "SUPERADMIN" || existing.role === "ADMIN") {
       return { success: false, error: "Permission denied. Only a Super Admin can modify an Admin or Super Admin role." };
     }
-    if (newRole === "SUPERADMIN" || newRole === "ADMIN") {
-      return { success: false, error: "Permission denied. Only a Super Admin can grant Admin or Super Admin role." };
+    if (newRole === "SUPERADMIN") {
+      return { success: false, error: "Permission denied. Only a Super Admin can grant the Super Admin role." };
     }
   }
 
