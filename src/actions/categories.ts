@@ -50,8 +50,8 @@ export async function toggleCategoryActiveStatus(id: string): Promise<ApiRespons
   }
 
   const userRole = (session.user as any).role as string;
-  if (!hasPermission(userRole, ["SUPERADMIN", "ADMIN", "EDITOR"])) {
-    return { success: false, error: "Permission denied." };
+  if (!hasPermission(userRole, ["SUPERADMIN", "ADMIN"])) {
+    return { success: false, error: "Permission denied. Only Super Admin or Admin can toggle categories." };
   }
 
   const existing = await prisma.category.findUnique({ where: { id } });
@@ -79,8 +79,8 @@ export async function createCategory(name: string, description?: string): Promis
   }
 
   const userRole = (session.user as any).role as string;
-  if (!hasPermission(userRole, ["SUPERADMIN", "ADMIN", "EDITOR"])) {
-    return { success: false, error: "Permission denied." };
+  if (!hasPermission(userRole, ["SUPERADMIN", "ADMIN"])) {
+    return { success: false, error: "Permission denied. Only Super Admin or Admin can add categories." };
   }
 
   const slug = slugify(name);
@@ -110,8 +110,8 @@ export async function updateCategory(id: string, name: string, description?: str
   }
 
   const userRole = (session.user as any).role as string;
-  if (!hasPermission(userRole, ["SUPERADMIN", "ADMIN", "EDITOR"])) {
-    return { success: false, error: "Permission denied." };
+  if (!hasPermission(userRole, ["SUPERADMIN", "ADMIN"])) {
+    return { success: false, error: "Permission denied. Only Super Admin or Admin can update categories." };
   }
 
   const slug = slugify(name);

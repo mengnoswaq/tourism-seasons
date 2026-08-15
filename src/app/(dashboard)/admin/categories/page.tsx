@@ -1,5 +1,8 @@
 import React from "react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { authOptions, hasPermission } from "@/lib/auth";
 import { getCategories, createCategory, toggleCategoryActiveStatus, deleteCategory } from "@/actions/categories";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +11,13 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ArrowLeft, FolderPlus, Folder, CheckCircle2, XCircle, Trash2, Globe } from "lucide-react";
 
 export default async function AdminCategoriesPage() {
+  const session = await getServerSession(authOptions);
+  const userRole = (session?.user as any)?.role as string;
+
+  if (!hasPermission(userRole, ["SUPERADMIN", "ADMIN"])) {
+    redirect("/admin");
+  }
+
   const categories = await getCategories();
 
   return (

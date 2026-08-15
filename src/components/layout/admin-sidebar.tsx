@@ -32,7 +32,7 @@ export function AdminSidebar() {
     { label: "Articles & Status", href: "/admin/articles", icon: Newspaper },
     { label: "Create Story", href: "/admin/articles/create", icon: PlusCircle },
     { label: "Navbar Menu", href: "/admin/navbar", icon: Menu, roles: ["SUPERADMIN", "ADMIN"] },
-    { label: "Categories", href: "/admin/categories", icon: Folder },
+    { label: "Categories", href: "/admin/categories", icon: Folder, roles: ["SUPERADMIN", "ADMIN"] },
     { label: "User Roles", href: "/admin/users", icon: Users, roles: ["SUPERADMIN", "ADMIN"] },
     { label: "Site Settings", href: "/admin/settings", icon: Settings, roles: ["SUPERADMIN", "ADMIN"] },
   ];
