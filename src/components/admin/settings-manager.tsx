@@ -223,52 +223,6 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
                   </div>
                 </div>
               </div>
-
-              {/* Secondary / Khmer Logo */}
-              <div className="space-y-2 pt-2 border-t border-slate-100">
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center justify-between">
-                  <span>Khmer Text / Secondary Logo (Optional)</span>
-                </label>
-                
-                <div className="flex flex-col sm:flex-row items-center gap-4 p-4 border border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
-                  <div className="w-24 h-24 rounded-xl bg-white border border-slate-200 p-2 flex items-center justify-center shrink-0 shadow-sm overflow-hidden">
-                    {logoKhmerUrl ? (
-                      <img src={logoKhmerUrl} alt="Khmer Logo" className="max-h-full max-w-full object-contain" />
-                    ) : (
-                      <ImageIcon className="w-8 h-8 text-slate-300" />
-                    )}
-                  </div>
-                  <div className="space-y-2 w-full">
-                    <div className="flex items-center gap-2">
-                      <label className="cursor-pointer">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleKhmerLogoUpload}
-                          className="hidden"
-                          disabled={isUploadingKhmerLogo}
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="gap-2 pointer-events-none"
-                          disabled={isUploadingKhmerLogo}
-                        >
-                          <Upload className="w-3.5 h-3.5" />
-                          {isUploadingKhmerLogo ? "Uploading..." : "Upload Khmer Logo"}
-                        </Button>
-                      </label>
-                    </div>
-                    <Input
-                      value={logoKhmerUrl}
-                      onChange={(e) => setLogoKhmerUrl(e.target.value)}
-                      placeholder="Or paste image URL (e.g. /logo-khmer.png)"
-                      className="text-xs font-mono"
-                    />
-                  </div>
-                </div>
-              </div>
             </CardContent>
           </Card>
 
@@ -350,18 +304,6 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
                 </p>
               </div>
             </div>
-
-            {/* Khmer Secondary Logo Preview */}
-            {logoKhmerUrl && (
-              <div className="space-y-2 pt-2 border-t border-slate-100">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                  Khmer Text Logo
-                </span>
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-center">
-                  <img src={logoKhmerUrl} alt="Khmer Logo Preview" className="h-10 w-auto object-contain" />
-                </div>
-              </div>
-            )}
           </CardContent>
         </Card>
       </div>
