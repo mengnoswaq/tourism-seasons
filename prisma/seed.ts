@@ -54,79 +54,34 @@ async function main() {
     }
   }
 
-  // 3. Create Users (Super Admin, Admin, Editor, Author, User)
+  // 3. Create Users (Super Admin: sivmeng12, Admin: Meng1)
   const userPasswordHash = await bcrypt.hash("Me095808176", 10);
-  const defaultPasswordHash = await bcrypt.hash("password123", 10);
-  const passwordHash = defaultPasswordHash;
 
   const superAdmin = await prisma.user.upsert({
-    where: { email: "admin@tourism-seasons.app" },
+    where: { email: "meng@gmail.com" },
     update: {
-      passwordHash: userPasswordHash,
       role: "SUPERADMIN",
     },
     create: {
-      name: "Chief Super Admin",
-      email: "admin@tourism-seasons.app",
+      name: "sivmeng12",
+      email: "meng@gmail.com",
       passwordHash: userPasswordHash,
       role: "SUPERADMIN",
-      bio: "Root administrator with full role delegation privileges.",
-      image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80",
-    },
-  });
-
-  await prisma.user.upsert({
-    where: { email: "superadmin@news.com" },
-    update: {
-      passwordHash: userPasswordHash,
-      role: "SUPERADMIN",
-    },
-    create: {
-      name: "Super Admin",
-      email: "superadmin@news.com",
-      passwordHash: userPasswordHash,
-      role: "SUPERADMIN",
-      bio: "Root administrator.",
-      image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80",
+      bio: "Root Super Administrator",
     },
   });
 
   const admin = await prisma.user.upsert({
-    where: { email: "admin@news.com" },
-    update: {},
-    create: {
-      name: "Standard Admin",
-      email: "admin@news.com",
-      passwordHash,
+    where: { email: "meng1@gmail.com" },
+    update: {
       role: "ADMIN",
-      bio: "Editor-in-Chief and system manager.",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=250&q=80",
     },
-  });
-
-  const author = await prisma.user.upsert({
-    where: { email: "author@news.com" },
-    update: {},
     create: {
-      name: "Elena Rostova",
-      email: "author@news.com",
-      passwordHash,
-      role: "AUTHOR",
-      bio: "Senior Technology & AI Correspondent.",
-      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=250&q=80",
-    },
-  });
-
-  const defaultUser = await prisma.user.upsert({
-    where: { email: "user@news.com" },
-    update: {},
-    create: {
-      name: "Alex Reader",
-      email: "user@news.com",
-      passwordHash,
-      role: "USER",
-      bio: "Avid news reader and commenter.",
-      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=250&q=80",
+      name: "Meng1",
+      email: "meng1@gmail.com",
+      passwordHash: userPasswordHash,
+      role: "ADMIN",
+      bio: "System Administrator",
     },
   });
 
@@ -145,7 +100,7 @@ async function main() {
   const techCategory = await prisma.category.findUnique({ where: { slug: "technology" } });
   const scienceCategory = await prisma.category.findUnique({ where: { slug: "science" } });
 
-  if (techCategory && author) {
+  if (techCategory && superAdmin) {
     await prisma.article.upsert({
       where: { slug: "nextgen-ai-models-reshape-software-engineering" },
       update: {},
@@ -178,7 +133,7 @@ As development velocities increase tenfold, the role of human engineers is evolv
         published: true,
         featured: true,
         views: 1420,
-        authorId: author.id,
+        authorId: superAdmin.id,
         categoryId: techCategory.id,
         seoTitle: "Next-Gen AI Models Reshape Software Engineering (2026)",
         seoDescription: "Explore how autonomous developer agents and neural architectures are transforming software delivery in 2026.",
@@ -206,7 +161,7 @@ As development velocities increase tenfold, the role of human engineers is evolv
     });
   }
 
-  if (scienceCategory && author) {
+  if (scienceCategory && superAdmin) {
     await prisma.article.upsert({
       where: { slug: "webb-telescope-discovers-atmospheric-water-on-exoplanet" },
       update: {},
@@ -234,7 +189,7 @@ Further observation windows scheduled for late 2026 will attempt to search for s
         published: true,
         featured: true,
         views: 980,
-        authorId: author.id,
+        authorId: superAdmin.id,
         categoryId: scienceCategory.id,
         publishedAt: new Date(),
         images: {
