@@ -162,12 +162,8 @@ export default async function AdminUsersPage() {
                           disabled={isProtected}
                           className="bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#2791F5] disabled:opacity-50 disabled:bg-slate-100"
                         >
-                          {currentUserRole === "SUPERADMIN" && (
-                            <>
-                              <option value="SUPERADMIN">SUPERADMIN</option>
-                              <option value="ADMIN">ADMIN</option>
-                            </>
-                          )}
+                          {currentUserRole === "SUPERADMIN" && <option value="SUPERADMIN">SUPERADMIN</option>}
+                          <option value="ADMIN">ADMIN</option>
                           <option value="EDITOR">EDITOR</option>
                           <option value="AUTHOR">AUTHOR</option>
                           <option value="USER">USER</option>

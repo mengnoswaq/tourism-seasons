@@ -107,9 +107,9 @@ export async function updateUserRole(targetUserId: string, newRole: string): Pro
     return { success: false, error: "Permission denied. Only a Super Admin can modify an Admin or Super Admin role." };
   }
 
-  // Security check: Only SUPERADMIN can assign SUPERADMIN or ADMIN role
-  if ((newRole === "SUPERADMIN" || newRole === "ADMIN") && currentRole !== "SUPERADMIN") {
-    return { success: false, error: "Permission denied. Only a Super Admin can grant Admin or Super Admin role." };
+  // Security check: Only SUPERADMIN can assign the SUPERADMIN role
+  if (newRole === "SUPERADMIN" && currentRole !== "SUPERADMIN") {
+    return { success: false, error: "Permission denied. Only a Super Admin can assign the Super Admin role." };
   }
 
   await prisma.user.update({
