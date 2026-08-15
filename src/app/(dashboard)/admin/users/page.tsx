@@ -158,6 +158,7 @@ export default async function AdminUsersPage() {
                         }
                       }} className="inline-flex items-center gap-2">
                         <select
+                          key={`${user.id}-${user.role}`}
                           name="role"
                           defaultValue={user.role}
                           disabled={isProtected}
