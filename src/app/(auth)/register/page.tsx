@@ -7,7 +7,8 @@ import { registerUser } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { UserPlus } from "lucide-react";
+import { signIn } from "next-auth/react";
+import { UserPlus, Chrome } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -84,13 +85,29 @@ export default function RegisterPage() {
               <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                 Password
               </label>
-              <Input name="password" type="password" placeholder="••••••••" required />
+              <Input name="password" type="password" placeholder="Min 6 characters..." required />
             </div>
 
             <Button variant="primary" className="w-full gap-2 py-2.5 font-bold" type="submit" disabled={isLoading}>
-              <UserPlus className="w-4 h-4" /> {isLoading ? "Creating Account..." : "Register"}
+              <UserPlus className="w-4 h-4" /> {isLoading ? "Creating Account..." : "Register Account"}
             </Button>
           </form>
+
+          <div className="relative my-4 flex items-center justify-center">
+            <div className="border-t border-slate-200 w-full" />
+            <span className="bg-white px-3 text-[10px] uppercase font-bold text-slate-400 absolute">
+              Or sign up with
+            </span>
+          </div>
+
+          <Button
+            variant="outline"
+            className="w-full gap-2 py-2 text-xs font-semibold"
+            type="button"
+            onClick={() => signIn("google", { callbackUrl: "/" })}
+          >
+            <Chrome className="w-4 h-4 text-blue-500" /> Sign Up with Google (Gmail)
+          </Button>
         </CardContent>
 
         <CardFooter className="justify-center text-xs text-slate-500">
