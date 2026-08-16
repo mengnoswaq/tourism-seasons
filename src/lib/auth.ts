@@ -75,13 +75,9 @@ export const authOptions: NextAuthOptions = {
       }
 
       // CRITICAL FIX FOR 494 REQUEST_HEADER_TOO_LARGE:
-      // Prevent Base64 Data URLs and oversized strings from inflating JWT session cookies
-      if (typeof token.picture === "string" && (token.picture.startsWith("data:") || token.picture.length > 500)) {
-        delete token.picture;
-      }
-      if (typeof token.image === "string" && ((token.image as string).startsWith("data:") || (token.image as string).length > 500)) {
-        delete token.image;
-      }
+      // Always strip picture/image from JWT token so cookie is under 200 bytes
+      delete token.picture;
+      delete token.image;
 
       return token;
     },
