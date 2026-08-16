@@ -16,11 +16,15 @@ export async function getSiteSettings() {
         data: {
           id: "default",
           siteName: "Tourism Seasons",
+          siteNameKhmer: "រដូវកាលទេសចរណ៍",
           siteSubtitle: "Travel & Seasonal Guides",
+          siteSubtitleKhmer: "មគ្គុទ្ទេសក៍ទេសចរណ៍",
           logoUrl: "/logo.png",
           logoKhmerUrl: "/logo-khmer.png",
           description:
             "Discover top travel destinations, seasonal vacation recommendations, local culture, and tourism insights across the world.",
+          descriptionKhmer:
+            "ស្វែងរកតំបន់ទេសចរណ៍កំពូលៗ អត្ថបទ និងការណែនាំអំពីការធ្វើដំណើរកម្សាន្តនៅគ្រប់រដូវកាល។",
         },
       });
     }
@@ -33,11 +37,15 @@ export async function getSiteSettings() {
       settings: {
         id: "default",
         siteName: "Tourism Seasons",
+        siteNameKhmer: "រដូវកាលទេសចរណ៍",
         siteSubtitle: "Travel & Seasonal Guides",
+        siteSubtitleKhmer: "មគ្គុទ្ទេសក៍ទេសចរណ៍",
         logoUrl: "/logo.png",
         logoKhmerUrl: "/logo-khmer.png",
         description:
           "Discover top travel destinations, seasonal vacation recommendations, local culture, and tourism insights across the world.",
+        descriptionKhmer:
+          "ស្វែងរកតំបន់ទេសចរណ៍កំពូលៗ អត្ថបទ និងការណែនាំអំពីការធ្វើដំណើរកម្សាន្តនៅគ្រប់រដូវកាល។",
       },
     };
   }
@@ -45,10 +53,13 @@ export async function getSiteSettings() {
 
 export async function updateSiteSettings(data: {
   siteName: string;
+  siteNameKhmer?: string;
   siteSubtitle?: string;
+  siteSubtitleKhmer?: string;
   logoUrl?: string;
   logoKhmerUrl?: string;
   description?: string;
+  descriptionKhmer?: string;
 }) {
   try {
     const session = await getServerSession(authOptions);
@@ -62,18 +73,24 @@ export async function updateSiteSettings(data: {
       where: { id: "default" },
       update: {
         siteName: data.siteName.trim(),
+        siteNameKhmer: data.siteNameKhmer?.trim() || null,
         siteSubtitle: data.siteSubtitle?.trim() || "Travel & Seasonal Guides",
+        siteSubtitleKhmer: data.siteSubtitleKhmer?.trim() || null,
         logoUrl: data.logoUrl || "/logo.png",
         logoKhmerUrl: data.logoKhmerUrl || "/logo-khmer.png",
         description: data.description?.trim() || "",
+        descriptionKhmer: data.descriptionKhmer?.trim() || null,
       },
       create: {
         id: "default",
         siteName: data.siteName.trim(),
+        siteNameKhmer: data.siteNameKhmer?.trim() || null,
         siteSubtitle: data.siteSubtitle?.trim() || "Travel & Seasonal Guides",
+        siteSubtitleKhmer: data.siteSubtitleKhmer?.trim() || null,
         logoUrl: data.logoUrl || "/logo.png",
         logoKhmerUrl: data.logoKhmerUrl || "/logo-khmer.png",
         description: data.description?.trim() || "",
+        descriptionKhmer: data.descriptionKhmer?.trim() || null,
       },
     });
 

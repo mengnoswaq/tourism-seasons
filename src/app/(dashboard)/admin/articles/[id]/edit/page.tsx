@@ -5,12 +5,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { updateArticle } from "@/actions/articles";
 import { getCategories } from "@/actions/categories";
+import { getProvinces } from "@/actions/provinces";
 import { uploadImage } from "@/lib/upload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Upload, CheckCircle, Edit3 } from "lucide-react";
-
+import { ArrowLeft, Upload, Edit3 } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
 
 interface EditArticlePageProps {
@@ -20,11 +20,20 @@ interface EditArticlePageProps {
 export default function EditArticlePage({ params }: EditArticlePageProps) {
   const router = useRouter();
   const toast = useToast();
-  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+  const [categories, setCategories] = useState<{ id: string; name: string; nameKhmer?: string | null }[]>([]);
+  const [provinces, setProvinces] = useState<{ id: string; name: string; nameKhmer?: string | null }[]>([]);
   const [article, setArticle] = useState<any>(null);
+  
+  const [title, setTitle] = useState("");
+  const [titleKhmer, setTitleKhmer] = useState("");
+  const [summary, setSummary] = useState("");
+  const [summaryKhmer, setSummaryKhmer] = useState("");
+  const [content, setContent] = useState("");
+  const [contentKhmer, setContentKhmer] = useState("");
+
   const [coverImageUrl, setCoverImageUrl] = useState("");
   const [youtubeUrl, setYoutubeUrl] = useState("");
-  const [galleryImages, setGalleryImages] = useState<{ url: string; caption: string }[]>([]);
+  const [galleryImages, setGalleryImages] = useState<{ url: string; caption: string; captionKhmer?: string }[]>([]);
   const [newGalleryUrl, setNewGalleryUrl] = useState("");
   const [newGalleryCaption, setNewGalleryCaption] = useState("");
   const [isUploading, setIsUploading] = useState(false);
@@ -42,11 +51,18 @@ export default function EditArticlePage({ params }: EditArticlePageProps) {
       .then((res) => res.json())
       .then((data) => {
         if (data.article) {
-          setArticle(data.article);
-          setCoverImageUrl(data.article.coverImage || "");
-          setYoutubeUrl(data.article.youtubeUrl || "");
-          if (Array.isArray(data.article.images)) {
-            setGalleryImages(data.article.images.map((img: any) => ({ url: img.url, caption: img.caption || "" })));
+          const a = data.article;
+          setArticle(a);
+          setTitle(a.title || "");
+          setTitleKhmer(a.titleKhmer || "");
+          setSummary(a.summary || "");
+          setSummaryKhmer(a.summaryKhmer || "");
+          setContent(a.content || "");
+          setContentKhmer(a.contentKhmer || "");
+          setCoverImageUrl(a.coverImage || "");
+          setYoutubeUrl(a.youtubeUrl || "");
+          if (Array.isArray(a.images)) {
+            setGalleryImages(a.images.map((img: any) => ({ url: img.url, caption: img.caption || "", captionKhmer: img.captionKhmer || "" })));
           }
         }
       })
@@ -98,21 +114,10 @@ export default function EditArticlePage({ params }: EditArticlePageProps) {
     setNewGalleryCaption("");
   };
 
-  const moveGalleryImage = (fromIndex: number, toIndex: number) => {
-    if (toIndex < 0 || toIndex >= galleryImages.length) return;
-    setGalleryImages((prev) => {
-      const updated = [...prev];
-      const [moved] = updated.splice(fromIndex, 1);
-      updated.splice(toIndex, 0, moved);
-      return updated;
-    });
-  };
-
   const removeGalleryImage = (index: number) => {
     setGalleryImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Mouse Drag and Drop Reordering Handlers
   const handleDragStart = (e: React.DragEvent, index: number) => {
     setDraggedIndex(index);
     e.dataTransfer.effectAllowed = "move";
@@ -188,10 +193,10 @@ export default function EditArticlePage({ params }: EditArticlePageProps) {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Edit3 className="w-4 h-4 text-[#2791F5]" />
-            <span className="text-xs font-bold uppercase tracking-wider text-[#2791F5]">Article Editor</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-[#2791F5]">Article Editor (Dual-Language)</span>
           </div>
           <h1 className="text-2xl font-black text-slate-900">Edit Article</h1>
-          <p className="text-xs text-slate-500">Update story details, video links, photo gallery, tags, and cover image</p>
+          <p className="text-xs text-slate-500">Update story details in English &amp; Khmer, video links, photo gallery, tags, and cover image</p>
         </div>
       </div>
 
@@ -205,14 +210,29 @@ export default function EditArticlePage({ params }: EditArticlePageProps) {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             
+            {/* 🇬🇧 Title English */}
             <div className="space-y-1.5">
               <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                Article Title *
+                🇬🇧 Article Title (English)
               </label>
               <Input
                 name="title"
-                defaultValue={article.title}
-                required
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Title in English..."
+              />
+            </div>
+
+            {/* 🇰🇭 Title Khmer */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                🇰🇭 Article Title (Khmer)
+              </label>
+              <Input
+                name="titleKhmer"
+                value={titleKhmer}
+                onChange={(e) => setTitleKhmer(e.target.value)}
+                placeholder="ចំណងជើងជាភាសាខ្មែរ..."
               />
             </div>
 
@@ -230,33 +250,56 @@ export default function EditArticlePage({ params }: EditArticlePageProps) {
                   <option value="">Select Category...</option>
                   {categories.map((cat) => (
                     <option key={cat.id} value={cat.id}>
-                      {cat.name}
+                      {cat.nameKhmer ? `${cat.nameKhmer} (${cat.name})` : cat.name}
                     </option>
                   ))}
                 </select>
               </div>
-
               <div className="space-y-1.5">
                 <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                  Tags (Comma Separated)
+                  📍 Cambodian Province / Destination
                 </label>
-                <Input
-                  name="tags"
-                  defaultValue={article.tags?.map((t: any) => t.tag?.name).join(", ") || ""}
-                  placeholder="AI, Tech, Quantum"
-                />
+                <select
+                  name="provinceId"
+                  defaultValue={article.provinceId || ""}
+                  className="w-full h-10 rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#2791F5]/50 font-medium"
+                >
+                  <option value="">-- Choose Province --</option>
+                  {provinces.map((prov) => (
+                    <option key={prov.id} value={prov.id}>
+                      📍 {prov.nameKhmer ? `${prov.name} (${prov.nameKhmer})` : prov.name}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
+            {/* 🇬🇧 Summary English */}
             <div className="space-y-1.5">
               <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                Summary / Excerpt *
+                🇬🇧 Summary / Excerpt (English)
               </label>
               <textarea
                 name="summary"
                 rows={2}
-                defaultValue={article.summary}
-                required
+                value={summary}
+                onChange={(e) => setSummary(e.target.value)}
+                placeholder="Short summary in English..."
+                className="w-full bg-white border border-slate-300 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#2791F5]/50"
+              />
+            </div>
+
+            {/* 🇰🇭 Summary Khmer */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                🇰🇭 Summary / Excerpt (Khmer)
+              </label>
+              <textarea
+                name="summaryKhmer"
+                rows={2}
+                value={summaryKhmer}
+                onChange={(e) => setSummaryKhmer(e.target.value)}
+                placeholder="សង្ខេបអត្ថបទជាភាសាខ្មែរ..."
                 className="w-full bg-white border border-slate-300 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#2791F5]/50"
               />
             </div>
@@ -290,7 +333,7 @@ export default function EditArticlePage({ params }: EditArticlePageProps) {
                 type="url"
                 value={youtubeUrl}
                 onChange={(e) => setYoutubeUrl(e.target.value)}
-                placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                placeholder="https://www.youtube.com/watch?v=..."
               />
               {youtubeEmbedUrl && (
                 <div className="mt-3 aspect-video w-full max-w-lg rounded-2xl overflow-hidden border border-slate-200 shadow-md">
@@ -305,10 +348,10 @@ export default function EditArticlePage({ params }: EditArticlePageProps) {
               )}
             </div>
 
-            {/* Article Multi-Image Gallery Manager */}
+            {/* Gallery Section */}
             <div className="space-y-4 pt-2 border-t border-slate-100">
               <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
-                Article Photo Gallery (Multiple Images)
+                Article Photo Gallery
               </label>
               
               <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
@@ -345,14 +388,8 @@ export default function EditArticlePage({ params }: EditArticlePageProps) {
                 </div>
               </div>
 
-              {/* 3-Column Mouse Drag & Drop Reorderable Gallery Grid */}
               {galleryImages.length > 0 && (
                 <div className="space-y-2 pt-2">
-                  <div className="flex items-center justify-between text-xs font-bold text-slate-700">
-                    <span>Reorder Gallery Images ({galleryImages.length})</span>
-                    <span className="text-[11px] text-slate-400 font-normal">Drag image cards with mouse to reorder position</span>
-                  </div>
-
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     {galleryImages.map((img, idx) => (
                       <div
@@ -368,23 +405,17 @@ export default function EditArticlePage({ params }: EditArticlePageProps) {
                         <div className="relative w-full rounded-lg overflow-hidden bg-slate-100 flex items-center justify-center p-1">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={img.url} alt={`Gallery ${idx + 1}`} className="w-full h-40 object-contain block pointer-events-none" />
-                          
-                          {/* Position Badge */}
                           <span className="absolute top-2 left-2 bg-slate-900/90 text-white text-[11px] font-black px-2 py-0.5 rounded-md shadow-md border border-white/20">
                             #{idx + 1}
                           </span>
-
-                          {/* Remove Control */}
                           <button
                             type="button"
                             onClick={() => removeGalleryImage(idx)}
                             className="absolute top-2 right-2 bg-white/95 text-red-600 hover:bg-red-600 hover:text-white text-xs w-7 h-7 rounded-lg flex items-center justify-center font-bold shadow-md border border-slate-200 transition-colors"
-                            title="Remove Image"
                           >
                             ✕
                           </button>
                         </div>
-
                         <div className="space-y-1">
                           <label className="text-[10px] font-bold uppercase text-slate-400">Caption / Label</label>
                           <input
@@ -405,15 +436,32 @@ export default function EditArticlePage({ params }: EditArticlePageProps) {
               )}
             </div>
 
-            <div className="space-y-1.5 pt-2">
+            {/* 🇬🇧 Article Body English */}
+            <div className="space-y-1.5 pt-2 border-t border-slate-100">
               <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                Article Body (Markdown Supported) *
+                🇬🇧 Article Body (English Markdown)
               </label>
               <textarea
                 name="content"
-                rows={12}
-                defaultValue={article.content}
-                required
+                rows={8}
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="Full article text in English..."
+                className="w-full bg-white border border-slate-300 rounded-xl p-4 text-sm font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#2791F5]/50"
+              />
+            </div>
+
+            {/* 🇰🇭 Article Body Khmer */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                🇰🇭 Article Body (Khmer Markdown)
+              </label>
+              <textarea
+                name="contentKhmer"
+                rows={10}
+                value={contentKhmer}
+                onChange={(e) => setContentKhmer(e.target.value)}
+                placeholder="ខ្លឹមសារអត្ថបទពេញលេញជាភាសាខ្មែរ..."
                 className="w-full bg-white border border-slate-300 rounded-xl p-4 text-sm font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#2791F5]/50"
               />
             </div>

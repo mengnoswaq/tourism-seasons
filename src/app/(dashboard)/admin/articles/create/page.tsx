@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createArticle } from "@/actions/articles";
 import { getCategories } from "@/actions/categories";
+import { getProvinces } from "@/actions/provinces";
 import { uploadImage } from "@/lib/upload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,7 @@ export default function CreateArticlePage() {
   const router = useRouter();
   const toast = useToast();
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+  const [provinces, setProvinces] = useState<{ id: string; name: string; nameKhmer?: string | null }[]>([]);
   const [coverImageUrl, setCoverImageUrl] = useState("");
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [galleryImages, setGalleryImages] = useState<{ url: string; caption: string }[]>([]);
@@ -31,6 +33,7 @@ export default function CreateArticlePage() {
 
   useEffect(() => {
     getCategories().then((data) => setCategories(data));
+    getProvinces().then((data) => setProvinces(data));
   }, []);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -179,12 +182,21 @@ export default function CreateArticlePage() {
             
             <div className="space-y-1.5">
               <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                Article Title *
+                🇬🇧 Article Title (English)
               </label>
               <Input
                 name="title"
-                placeholder="e.g. Next-Gen AI Models Reshape Software Engineering"
-                required
+                placeholder="e.g. Siem Reap Tourism Highlights 2026 (Optional if Khmer Title entered)"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                🇰🇭 Article Title (Khmer)
+              </label>
+              <Input
+                name="titleKhmer"
+                placeholder="e.g. ព័ត៌មានទេសចរណ៍ខេត្តសៀមរាប ២០២៦"
               />
             </div>
 
@@ -196,12 +208,12 @@ export default function CreateArticlePage() {
                 <select
                   name="categoryId"
                   required
-                  className="w-full h-10 rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#2791F5]/50"
+                  className="w-full h-10 rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#2791F5]/50 font-medium"
                 >
                   <option value="">Select Category...</option>
                   {categories.map((cat) => (
                     <option key={cat.id} value={cat.id}>
-                      {cat.name}
+                      📂 {cat.name}
                     </option>
                   ))}
                 </select>
@@ -209,24 +221,42 @@ export default function CreateArticlePage() {
 
               <div className="space-y-1.5">
                 <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                  Tags (Comma Separated)
+                  📍 Cambodian Province / Destination
                 </label>
-                <Input
-                  name="tags"
-                  placeholder="AI, Tech, Quantum"
-                />
+                <select
+                  name="provinceId"
+                  className="w-full h-10 rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#2791F5]/50 font-medium"
+                >
+                  <option value="">-- Choose Province --</option>
+                  {provinces.map((prov) => (
+                    <option key={prov.id} value={prov.id}>
+                      📍 {prov.nameKhmer ? `${prov.name} (${prov.nameKhmer})` : prov.name}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
             <div className="space-y-1.5">
               <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                Summary / Excerpt *
+                🇬🇧 Summary / Excerpt (English)
               </label>
               <textarea
                 name="summary"
                 rows={2}
-                placeholder="Short 2-sentence teaser for article cards and social previews..."
-                required
+                placeholder="Short teaser in English (Optional if Khmer Summary entered)..."
+                className="w-full bg-white border border-slate-300 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#2791F5]/50"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                🇰🇭 Summary / Excerpt (Khmer)
+              </label>
+              <textarea
+                name="summaryKhmer"
+                rows={2}
+                placeholder="សេចក្តីសង្ខេបជាភាសាខ្មែរ..."
                 className="w-full bg-white border border-slate-300 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#2791F5]/50"
               />
             </div>

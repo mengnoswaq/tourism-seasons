@@ -5,6 +5,7 @@ import "./globals.css";
 import { SessionProvider } from "@/components/providers/session-provider";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { ToastProvider } from "@/components/ui/toast";
+import { LanguageProvider } from "@/context/language-context";
 import { GoogleAnalyticsTracker } from "@/components/analytics/google-analytics";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -53,14 +54,16 @@ export default function RootLayout({
         </Script>
       </head>
       <body className={`${inter.variable} font-sans min-h-screen flex flex-col bg-white text-slate-900`}>
-        <SessionProvider>
-          <QueryProvider>
-            <ToastProvider>
-              <GoogleAnalyticsTracker />
-              {children}
-            </ToastProvider>
-          </QueryProvider>
-        </SessionProvider>
+        <LanguageProvider>
+          <SessionProvider>
+            <QueryProvider>
+              <ToastProvider>
+                <GoogleAnalyticsTracker />
+                {children}
+              </ToastProvider>
+            </QueryProvider>
+          </SessionProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

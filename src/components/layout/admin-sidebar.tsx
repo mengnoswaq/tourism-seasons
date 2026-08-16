@@ -17,13 +17,16 @@ import {
   Menu,
   X,
   Settings,
+  Tag,
 } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/context/language-context";
 
 export function AdminSidebar() {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const { t } = useLanguage();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -35,13 +38,15 @@ export function AdminSidebar() {
   const userRole = (session?.user as any)?.role || "USER";
 
   const navItems = [
-    { label: "Dashboard & Analytics", href: "/admin", icon: LayoutDashboard },
-    { label: "Articles & Status", href: "/admin/articles", icon: Newspaper },
-    { label: "Create Story", href: "/admin/articles/create", icon: PlusCircle },
-    { label: "Navbar Menu", href: "/admin/navbar", icon: Menu, roles: ["SUPERADMIN", "ADMIN"] },
-    { label: "Categories", href: "/admin/categories", icon: Folder, roles: ["SUPERADMIN", "ADMIN"] },
-    { label: "User Roles", href: "/admin/users", icon: Users, roles: ["SUPERADMIN", "ADMIN"] },
-    { label: "Site Settings", href: "/admin/settings", icon: Settings, roles: ["SUPERADMIN", "ADMIN"] },
+    { label: t("Dashboard & Analytics", "ផ្ទាំងគ្រប់គ្រង & វិភាគ"), href: "/admin", icon: LayoutDashboard },
+    { label: t("Articles & Status", "អត្ថបទ & ស្ថានភាព"), href: "/admin/articles", icon: Newspaper },
+    { label: t("Create Story", "បង្កើតអត្ថបទថ្មី"), href: "/admin/articles/create", icon: PlusCircle },
+    { label: t("Provinces Control", "គ្រប់គ្រង ២៥ ខេត្ត"), href: "/admin/provinces", icon: Tag, roles: ["SUPERADMIN", "ADMIN"] },
+    { label: t("Reader Comments", "មតិអ្នកអាន"), href: "/admin/comments", icon: Users, roles: ["SUPERADMIN", "ADMIN"] },
+    { label: t("Navbar Menu", "ម៉ឺនុយ របាររកមើល"), href: "/admin/navbar", icon: Menu, roles: ["SUPERADMIN", "ADMIN"] },
+    { label: t("Categories", "ប្រភេទព័ត៌មាន"), href: "/admin/categories", icon: Folder, roles: ["SUPERADMIN", "ADMIN"] },
+    { label: t("User Roles", "តួនាទីអ្នកប្រើប្រាស់"), href: "/admin/users", icon: Users, roles: ["SUPERADMIN", "ADMIN"] },
+    { label: t("Site Settings", "ការកំណត់គេហទំព័រ"), href: "/admin/settings", icon: Settings, roles: ["SUPERADMIN", "ADMIN"] },
   ];
 
   const filteredNavItems = navItems.filter(
@@ -153,7 +158,7 @@ export function AdminSidebar() {
                 className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-[#2791F5] hover:bg-blue-50 transition-colors"
               >
                 <Globe className="w-4 h-4 text-[#2791F5] shrink-0" />
-                <span>View Live Website</span>
+                <span>{t("View Live Website", "មើលគេហទំព័រផ្ទាល់")}</span>
               </Link>
 
               {session?.user && (
@@ -172,7 +177,7 @@ export function AdminSidebar() {
                       signOut();
                     }}
                     className="p-1.5 text-slate-400 hover:text-red-500 rounded-lg hover:bg-slate-200 transition-colors"
-                    title="Sign Out"
+                    title={t("Sign Out", "ចាកចេញ")}
                   >
                     <LogOut className="w-4 h-4" />
                   </button>
@@ -256,10 +261,10 @@ export function AdminSidebar() {
               "flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-[#2791F5] hover:bg-blue-50 transition-colors",
               collapsed && "justify-center"
             )}
-            title="View Live Website"
+            title={t("View Live Website", "មើលគេហទំព័រផ្ទាល់")}
           >
             <Globe className="w-4 h-4 text-[#2791F5] shrink-0" />
-            {!collapsed && <span>View Live Website</span>}
+            {!collapsed && <span>{t("View Live Website", "មើលគេហទំព័រផ្ទាល់")}</span>}
           </Link>
 
           {session?.user && (
@@ -278,7 +283,7 @@ export function AdminSidebar() {
                 <button
                   onClick={() => signOut()}
                   className="p-1.5 text-slate-400 hover:text-red-500 rounded-lg hover:bg-slate-200 transition-colors"
-                  title="Sign Out"
+                  title={t("Sign Out", "ចាកចេញ")}
                 >
                   <LogOut className="w-3.5 h-3.5" />
                 </button>
@@ -290,4 +295,3 @@ export function AdminSidebar() {
     </>
   );
 }
-

@@ -7,8 +7,8 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       where: { id: params.id },
       include: {
         category: true,
+        province: true,
         images: { orderBy: { order: "asc" } },
-        tags: { include: { tag: true } },
       },
     });
 

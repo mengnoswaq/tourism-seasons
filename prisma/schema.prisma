@@ -15,6 +15,7 @@ model User {
   passwordHash String?
   image        String?
   bio          String?
+  bioKhmer     String?
   role         String    @default("USER")
   status       String    @default("ACTIVE")
   articles     Article[] @relation("AuthorArticles")
@@ -23,75 +24,88 @@ model User {
   updatedAt    DateTime  @updatedAt
 }
 
-model Category {
-  id          String    @id @default(cuid())
-  name        String    @unique
-  slug        String    @unique
-  description String?
-  status      String    @default("ACTIVE")
-  articles    Article[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+model Province {
+  id               String    @id @default(cuid())
+  name             String    @unique
+  nameKhmer        String?
+  slug             String    @unique
+  code             String?
+  image            String?
+  description      String?
+  descriptionKhmer String?
+  status           String    @default("ACTIVE")
+  articles         Article[]
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 }
 
-model Tag {
-  id        String       @id @default(cuid())
-  name      String       @unique
-  slug      String       @unique
-  articles  ArticleTag[]
-  createdAt DateTime     @default(now())
+model Category {
+  id               String    @id @default(cuid())
+  name             String    @unique
+  nameKhmer        String?
+  slug             String    @unique
+  description      String?
+  descriptionKhmer String?
+  status           String    @default("ACTIVE")
+  articles         Article[]
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 }
 
 model Article {
-  id             String       @id @default(cuid())
-  title          String
-  slug           String       @unique
-  summary        String
-  content        String
-  coverImage     String?
-  youtubeUrl     String?
-  images         ArticleImage[]
-  published      Boolean      @default(false)
-  featured       Boolean      @default(false)
-  views          Int          @default(0)
-  authorId       String
-  author         User         @relation("AuthorArticles", fields: [authorId], references: [id], onDelete: Cascade)
-  categoryId     String
-  category       Category     @relation(fields: [categoryId], references: [id])
-  tags           ArticleTag[]
-  comments       Comment[]
-  articleViews   ArticleView[]
+  id                  String       @id @default(cuid())
+  title               String
+  titleKhmer          String?
+  slug                String       @unique
+  summary             String
+  summaryKhmer        String?
+  content             String
+  contentKhmer        String?
+  coverImage          String?
+  youtubeUrl          String?
+  images              ArticleImage[]
+  published           Boolean      @default(false)
+  featured            Boolean      @default(false)
+  views               Int          @default(0)
+  authorId            String
+  author              User         @relation("AuthorArticles", fields: [authorId], references: [id], onDelete: Cascade)
+  categoryId          String
+  category            Category     @relation(fields: [categoryId], references: [id])
   
-  seoTitle       String?
-  seoDescription String?
+  provinceId          String?
+  province            Province?    @relation(fields: [provinceId], references: [id])
+  latitude            Float?
+  longitude           Float?
+  bestMonths          String?
+
+  comments            Comment[]
+  articleViews        ArticleView[]
   
-  publishedAt    DateTime?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  seoTitle            String?
+  seoTitleKhmer       String?
+  seoDescription      String?
+  seoDescriptionKhmer String?
+  
+  publishedAt         DateTime?
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
 
   @@index([slug])
   @@index([categoryId])
+  @@index([provinceId])
 }
 
 model ArticleImage {
-  id        String   @id @default(cuid())
-  url       String
-  caption   String?
-  order     Int      @default(0)
-  articleId String
-  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
+  id           String   @id @default(cuid())
+  url          String
+  caption      String?
+  captionKhmer String?
+  order        Int      @default(0)
+  articleId    String
+  article      Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
 
   @@index([articleId])
-}
-
-model ArticleTag {
-  articleId String
-  tagId     String
-  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
-  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
-
-  @@id([articleId, tagId])
 }
 
 model Comment {
@@ -126,22 +140,31 @@ model ArticleView {
 }
 
 model NavItem {
-  id        String   @id @default(cuid())
-  label     String
-  url       String
-  order     Int      @default(0)
-  status    String   @default("ACTIVE")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(cuid())
+  label      String
+  labelKhmer String?
+  type       String   @default("CUSTOM")
+  targetId   String?
+  url        String
+  order      Int      @default(0)
+  status     String   @default("ACTIVE")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([type])
+  @@index([status])
+  @@index([order])
 }
 
 model SiteSetting {
-  id           String   @id @default("default")
-  siteName     String   @default("Tourism Seasons")
-  siteSubtitle String   @default("Travel & Seasonal Guides")
-  logoUrl      String?  @default("/logo.png")
-  logoKhmerUrl String?  @default("/logo-khmer.png")
-  description  String?  @default("Discover top travel destinations, seasonal vacation recommendations, local culture, and tourism insights across the world.")
-  updatedAt    DateTime @updatedAt
+  id                 String   @id @default("default")
+  siteName           String   @default("Tourism Seasons")
+  siteNameKhmer      String?  @default("រដូវកាលទេសចរណ៍")
+  siteSubtitle       String   @default("Travel & Seasonal Guides")
+  siteSubtitleKhmer  String?  @default("មគ្គុទ្ទេសក៍ទេសចរណ៍")
+  logoUrl            String?  @default("/logo.png")
+  logoKhmerUrl       String?  @default("/logo-khmer.png")
+  description        String?  @default("Discover top travel destinations, seasonal vacation recommendations, local culture, and tourism insights across the world.")
+  descriptionKhmer  String?
+  updatedAt          DateTime @updatedAt
 }
-

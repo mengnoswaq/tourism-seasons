@@ -9,7 +9,7 @@ import { ArticleFilterParams, ApiResponse } from "@/types";
 
 export async function getPublishedArticles(params: ArticleFilterParams = {}) {
   try {
-    const { categorySlug, tagSlug, search, page = 1, limit = 10, featured } = params;
+    const { categorySlug, provinceSlug, search, page = 1, limit = 10, featured } = params;
 
     const where: any = {
       published: true,
@@ -23,12 +23,8 @@ export async function getPublishedArticles(params: ArticleFilterParams = {}) {
       where.category = { slug: categorySlug };
     }
 
-    if (tagSlug) {
-      where.tags = {
-        some: {
-          tag: { slug: tagSlug },
-        },
-      };
+    if (provinceSlug) {
+      where.province = { slug: provinceSlug };
     }
 
     if (search) {
@@ -39,6 +35,10 @@ export async function getPublishedArticles(params: ArticleFilterParams = {}) {
       ];
     }
 
+    const sortOrder: any = params.orderBy === "views" 
+      ? [{ views: "desc" }, { createdAt: "desc" }] 
+      : [{ publishedAt: "desc" }, { createdAt: "desc" }];
+
     const [articles, totalCount] = await Promise.all([
       prisma.article.findMany({
         where,
@@ -47,17 +47,15 @@ export async function getPublishedArticles(params: ArticleFilterParams = {}) {
             select: { id: true, name: true, image: true, email: true, role: true, bio: true, createdAt: true, updatedAt: true },
           },
           category: true,
+          province: true,
           images: {
             orderBy: { order: "asc" },
-          },
-          tags: {
-            include: { tag: true },
           },
           _count: {
             select: { comments: true },
           },
         },
-        orderBy: { publishedAt: "desc" },
+        orderBy: sortOrder,
         skip: (page - 1) * limit,
         take: limit,
       }),
@@ -90,11 +88,9 @@ export async function getArticleBySlug(slug: string) {
           select: { id: true, name: true, image: true, email: true, role: true, bio: true, createdAt: true, updatedAt: true },
         },
         category: true,
+        province: true,
         images: {
           orderBy: { order: "asc" },
-        },
-        tags: {
-          include: { tag: true },
         },
       },
     });
@@ -192,10 +188,14 @@ export async function createArticle(formData: FormData): Promise<ApiResponse> {
     return { success: false, error: "Permission denied. Author, Editor, or Admin role required." };
   }
 
-  const title = formData.get("title") as string;
-  const summary = formData.get("summary") as string;
-  const content = formData.get("content") as string;
-  const categoryId = formData.get("categoryId") as string;
+  const title = (formData.get("title") as string)?.trim() || null;
+  const titleKhmer = (formData.get("titleKhmer") as string)?.trim() || null;
+  const summary = (formData.get("summary") as string)?.trim() || null;
+  const summaryKhmer = (formData.get("summaryKhmer") as string)?.trim() || null;
+  const content = (formData.get("content") as string)?.trim() || null;
+  const contentKhmer = (formData.get("contentKhmer") as string)?.trim() || null;
+  const categoryId = (formData.get("categoryId") as string)?.trim();
+  const provinceId = (formData.get("provinceId") as string)?.trim() || null;
   const coverImage = formData.get("coverImage") as string;
   const youtubeUrl = formData.get("youtubeUrl") as string;
   const imagesRaw = formData.get("images") as string;
@@ -203,13 +203,18 @@ export async function createArticle(formData: FormData): Promise<ApiResponse> {
   const featured = formData.get("featured") === "true";
   const tagNamesStr = formData.get("tags") as string;
 
-  if (!title || !summary || !content || !categoryId) {
-    return { success: false, error: "Title, summary, content, and category are required." };
+  const hasTitle = Boolean(title || titleKhmer);
+  const hasSummary = Boolean(summary || summaryKhmer);
+  const hasContent = Boolean(content || contentKhmer);
+
+  if (!hasTitle || !hasSummary || !hasContent || !categoryId) {
+    return { success: false, error: "Article title, summary, content (in English or Khmer), and category are required." };
   }
 
-  const baseSlug = slugify(title);
-  const existingSlug = await prisma.article.findUnique({ where: { slug: baseSlug } });
-  const slug = existingSlug ? `${baseSlug}-${Date.now().toString().slice(-4)}` : baseSlug;
+  const textToSlug = title || titleKhmer || "article";
+  const rawSlug = slugify(textToSlug) || `story-${Date.now()}`;
+  const existingSlug = await prisma.article.findUnique({ where: { slug: rawSlug } });
+  const slug = existingSlug ? `${rawSlug}-${Date.now().toString().slice(-4)}` : rawSlug;
 
   const tagNames = tagNamesStr ? tagNamesStr.split(",").map((t) => t.trim()).filter(Boolean) : [];
 
@@ -229,12 +234,19 @@ export async function createArticle(formData: FormData): Promise<ApiResponse> {
     } catch (e) {}
   }
 
+  const finalTitle = title || titleKhmer || "Untitled Article";
+  const finalSummary = summary || summaryKhmer || "";
+  const finalContent = content || contentKhmer || "";
+
   const article = await prisma.article.create({
     data: {
-      title,
+      title: finalTitle,
+      titleKhmer,
       slug,
-      summary,
-      content,
+      summary: finalSummary,
+      summaryKhmer,
+      content: finalContent,
+      contentKhmer,
       coverImage: coverImage || null,
       youtubeUrl: youtubeUrl || null,
       published,
@@ -242,21 +254,9 @@ export async function createArticle(formData: FormData): Promise<ApiResponse> {
       publishedAt: published ? new Date() : null,
       authorId: (session.user as any).id,
       categoryId,
+      provinceId: provinceId || null,
       images: {
         create: galleryImages,
-      },
-      tags: {
-        create: await Promise.all(
-          tagNames.map(async (tagName) => {
-            const tagSlug = slugify(tagName);
-            const tag = await prisma.tag.upsert({
-              where: { slug: tagSlug },
-              update: {},
-              create: { name: tagName, slug: tagSlug },
-            });
-            return { tagId: tag.id };
-          })
-        ),
       },
     },
   });
@@ -286,9 +286,13 @@ export async function updateArticle(id: string, formData: FormData): Promise<Api
   }
 
   const title = formData.get("title") as string;
+  const titleKhmer = (formData.get("titleKhmer") as string)?.trim() || null;
   const summary = formData.get("summary") as string;
+  const summaryKhmer = (formData.get("summaryKhmer") as string)?.trim() || null;
   const content = formData.get("content") as string;
+  const contentKhmer = (formData.get("contentKhmer") as string)?.trim() || null;
   const categoryId = formData.get("categoryId") as string;
+  const provinceId = (formData.get("provinceId") as string)?.trim() || null;
   const coverImage = formData.get("coverImage") as string;
   const youtubeUrl = formData.get("youtubeUrl") as string;
   const imagesRaw = formData.get("images") as string;
@@ -319,15 +323,23 @@ export async function updateArticle(id: string, formData: FormData): Promise<Api
     } catch (e) {}
   }
 
+  const finalTitle = title || titleKhmer || existing.title;
+  const finalSummary = summary || summaryKhmer || existing.summary;
+  const finalContent = content || contentKhmer || existing.content;
+
   const article = await prisma.article.update({
     where: { id },
     data: {
-      title,
-      summary,
-      content,
+      title: finalTitle,
+      titleKhmer,
+      summary: finalSummary,
+      summaryKhmer,
+      content: finalContent,
+      contentKhmer,
       coverImage: coverImage || existing.coverImage,
       youtubeUrl: youtubeUrl !== undefined ? (youtubeUrl || null) : existing.youtubeUrl,
       categoryId,
+      provinceId: provinceId || existing.provinceId,
       published,
       featured,
       publishedAt: published && !existing.published ? new Date() : existing.publishedAt,

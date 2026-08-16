@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Battambang:wght@400;700;900&family=Kantumruy+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Siemreap&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,6 +7,7 @@
 @layer base {
   body {
     @apply bg-white text-slate-900 antialiased;
+    font-family: var(--font-inter), 'Kantumruy Pro', 'Battambang', 'Siemreap', sans-serif;
   }
 
   /* Prevent iOS Safari / mobile auto-zoom on input focus */
@@ -13,6 +16,29 @@
       font-size: 16px !important;
     }
   }
+}
+
+/* Custom Khmer Font Utility Classes */
+.font-khmer {
+  font-family: 'Kantumruy Pro', 'Battambang', 'Siemreap', sans-serif;
+}
+
+.font-battambang {
+  font-family: 'Battambang', 'Kantumruy Pro', sans-serif;
+}
+
+.font-kantumruy {
+  font-family: 'Kantumruy Pro', sans-serif;
+}
+
+.font-siemreap {
+  font-family: 'Siemreap', sans-serif;
+}
+
+/* Global Line-Height & Vertical Spacing for Headings & Titles (Khmer & English) */
+h1, h2, h3, h4, h5, h6, .kh-title {
+  line-height: 1.65 !important;
+  letter-spacing: 0.01em;
 }
 
 @keyframes marquee {

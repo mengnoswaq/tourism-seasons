@@ -7,32 +7,40 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/components/ui/toast";
-import { Image as ImageIcon, Upload, Save, Building, Eye, RefreshCw } from "lucide-react";
+import { Image as ImageIcon, Upload, Save, Building, Eye, RefreshCw, Languages } from "lucide-react";
 
 interface SettingsManagerProps {
   initialSettings: {
     id: string;
     siteName: string;
+    siteNameKhmer?: string | null;
     siteSubtitle?: string | null;
+    siteSubtitleKhmer?: string | null;
     logoUrl?: string | null;
     logoKhmerUrl?: string | null;
     description?: string | null;
+    descriptionKhmer?: string | null;
   };
 }
 
 export function SettingsManager({ initialSettings }: SettingsManagerProps) {
   const toast = useToast();
   const [siteName, setSiteName] = useState(initialSettings.siteName || "Tourism Seasons");
+  const [siteNameKhmer, setSiteNameKhmer] = useState(initialSettings.siteNameKhmer || "រដូវកាលទេសចរណ៍");
   const [siteSubtitle, setSiteSubtitle] = useState(initialSettings.siteSubtitle || "Travel & Seasonal Guides");
+  const [siteSubtitleKhmer, setSiteSubtitleKhmer] = useState(initialSettings.siteSubtitleKhmer || "មគ្គុទ្ទេសក៍ទេសចរណ៍");
   const [logoUrl, setLogoUrl] = useState(initialSettings.logoUrl || "/logo.png");
   const [logoKhmerUrl, setLogoKhmerUrl] = useState(initialSettings.logoKhmerUrl || "/logo-khmer.png");
   const [description, setDescription] = useState(
     initialSettings.description ||
       "Discover top travel destinations, seasonal vacation recommendations, local culture, and tourism insights across the world."
   );
+  const [descriptionKhmer, setDescriptionKhmer] = useState(
+    initialSettings.descriptionKhmer ||
+      "ស្វែងរកតំបន់ទេសចរណ៍កំពូលៗ អត្ថបទ និងការណែនាំអំពីការធ្វើដំណើរកម្សាន្តនៅគ្រប់រដូវកាល។"
+  );
 
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
-  const [isUploadingKhmerLogo, setIsUploadingKhmerLogo] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,22 +59,6 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
     }
   };
 
-  const handleKhmerLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setIsUploadingKhmerLogo(true);
-    try {
-      const dataUrl = await uploadImage(file, { maxWidth: 800, quality: 0.9 });
-      setLogoKhmerUrl(dataUrl);
-      toast.success("Khmer logo uploaded successfully! Preview updated.");
-    } catch (err) {
-      toast.error("Failed to upload Khmer logo image.");
-    } finally {
-      setIsUploadingKhmerLogo(false);
-    }
-  };
-
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!siteName.trim()) {
@@ -78,14 +70,17 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
     try {
       const res = await updateSiteSettings({
         siteName,
+        siteNameKhmer,
         siteSubtitle,
+        siteSubtitleKhmer,
         logoUrl,
         logoKhmerUrl,
         description,
+        descriptionKhmer,
       });
 
       if (res.success) {
-        toast.success("Site settings & logo updated successfully!");
+        toast.success("Site settings & dual-language branding updated successfully!");
       } else {
         toast.error(res.error || "Failed to update site settings.");
       }
@@ -104,19 +99,21 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
           <Card className="border-slate-200 shadow-sm">
             <CardHeader>
               <div className="flex items-center gap-2 text-[#2791F5] font-bold text-xs uppercase tracking-wider">
-                <Building className="w-4 h-4" /> Identity &amp; Branding
+                <Building className="w-4 h-4" /> Identity &amp; Dual-Language Branding
               </div>
               <CardTitle className="text-xl font-black text-slate-900">
-                Site Name &amp; Identity
+                Site Name &amp; Identity (English 🇬🇧 / Khmer 🇰🇭)
               </CardTitle>
               <CardDescription>
-                Configure the primary project name, subtitle, and branding metadata shown across the site.
+                Configure the primary project name, subtitle, and description in English and Khmer.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              
+              {/* English Site Name */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  Site Name <span className="text-red-500">*</span>
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1">
+                  🇬🇧 Site Name (English) <span className="text-red-500">*</span>
                 </label>
                 <Input
                   value={siteName}
@@ -126,9 +123,22 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
                 />
               </div>
 
+              {/* Khmer Site Name */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  Site Subtitle / Tagline
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1">
+                  🇰🇭 Site Name (Khmer)
+                </label>
+                <Input
+                  value={siteNameKhmer}
+                  onChange={(e) => setSiteNameKhmer(e.target.value)}
+                  placeholder="e.g. រដូវកាលទេសចរណ៍"
+                />
+              </div>
+
+              {/* English Subtitle */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1">
+                  🇬🇧 Subtitle / Tagline (English)
                 </label>
                 <Input
                   value={siteSubtitle}
@@ -137,16 +147,43 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
                 />
               </div>
 
+              {/* Khmer Subtitle */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  Site Description (Footer &amp; SEO)
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1">
+                  🇰🇭 Subtitle / Tagline (Khmer)
+                </label>
+                <Input
+                  value={siteSubtitleKhmer}
+                  onChange={(e) => setSiteSubtitleKhmer(e.target.value)}
+                  placeholder="e.g. មគ្គុទ្ទេសក៍ទេសចរណ៍"
+                />
+              </div>
+
+              {/* English Description */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1">
+                  🇬🇧 Description (English)
                 </label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  rows={3}
+                  rows={2}
                   className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#2791F5]/50 transition-all"
-                  placeholder="Brief description of your publication..."
+                  placeholder="Brief publication description in English..."
+                />
+              </div>
+
+              {/* Khmer Description */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1">
+                  🇰🇭 Description (Khmer)
+                </label>
+                <textarea
+                  value={descriptionKhmer}
+                  onChange={(e) => setDescriptionKhmer(e.target.value)}
+                  rows={2}
+                  className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#2791F5]/50 transition-all"
+                  placeholder="ការពណ៌នាជាភាសាខ្មែរ..."
                 />
               </div>
             </CardContent>
@@ -161,12 +198,8 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
               <CardTitle className="text-xl font-black text-slate-900">
                 Logo Management
               </CardTitle>
-              <CardDescription>
-                Upload high-resolution PNG/SVG/WebP logo image files for your website header and footer.
-              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Primary Logo */}
               <div className="space-y-2">
                 <label className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center justify-between">
                   <span>Main Brand Logo Image</span>
@@ -248,15 +281,11 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
             <CardTitle className="text-lg font-black text-slate-900">
               Branding Display Preview
             </CardTitle>
-            <CardDescription>
-              See how your updated logo and project name look on Navbar and Footer components.
-            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Header Preview */}
             <div className="space-y-2">
               <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                Navbar Preview (Light Theme)
+                English Branding (🇬🇧)
               </span>
               <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -265,43 +294,34 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
                   )}
                   <div className="flex flex-col">
                     <span className="font-black text-base tracking-tight text-slate-900 leading-none">
-                      {siteName.toUpperCase().split(" ")[0]}
-                      {siteName.toUpperCase().split(" ").length > 1 && (
-                        <span className="text-[#2791F5]">
-                          {siteName.toUpperCase().split(" ").slice(1).join(" ")}
-                        </span>
-                      )}
+                      {siteName}
                     </span>
                     <span className="text-[9px] tracking-widest text-slate-400 font-semibold uppercase mt-0.5">
-                      {siteSubtitle || "Travel & Seasonal Guides"}
+                      {siteSubtitle}
                     </span>
                   </div>
                 </div>
-                <span className="text-xs text-[#2791F5] font-semibold bg-blue-50 px-2.5 py-1 rounded-lg">
-                  Nav Menu
-                </span>
               </div>
             </div>
 
-            {/* Footer Preview */}
             <div className="space-y-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                Footer Preview (Dark Theme)
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#2791F5]">
+                Khmer Branding (🇰🇭)
               </span>
-              <div className="p-5 bg-slate-900 rounded-2xl border border-slate-800 text-white space-y-3">
+              <div className="p-4 bg-blue-50/60 rounded-2xl border border-blue-100 shadow-sm flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="bg-white p-2 rounded-xl shadow-md">
-                    {logoUrl && (
-                      <img src={logoUrl} alt="Footer Logo Preview" className="h-8 w-auto object-contain" />
-                    )}
+                  {logoUrl && (
+                    <img src={logoUrl} alt="Khmer Logo Preview" className="h-10 w-auto object-contain" />
+                  )}
+                  <div className="flex flex-col">
+                    <span className="font-black text-base tracking-tight text-[#2791F5] leading-none">
+                      {siteNameKhmer || siteName}
+                    </span>
+                    <span className="text-[9px] tracking-widest text-slate-500 font-semibold uppercase mt-0.5">
+                      {siteSubtitleKhmer || siteSubtitle}
+                    </span>
                   </div>
-                  <span className="font-bold text-base text-white">
-                    {siteName.toUpperCase()}
-                  </span>
                 </div>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  {description || "Discover top travel destinations, seasonal recommendations..."}
-                </p>
               </div>
             </div>
           </CardContent>

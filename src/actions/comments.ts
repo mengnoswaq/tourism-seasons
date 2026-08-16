@@ -1,81 +1,124 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { ApiResponse } from "@/types";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { ApiResponse } from "@/types";
 
 export async function getArticleComments(articleId: string) {
-  const comments = await prisma.comment.findMany({
-    where: {
-      articleId,
-      status: "APPROVED",
-    },
-    include: {
-      author: {
-        select: { id: true, name: true, image: true, role: true },
+  try {
+    return await prisma.comment.findMany({
+      where: {
+        articleId,
+        status: "APPROVED",
+        parentId: null,
       },
-    },
-    orderBy: { createdAt: "desc" },
-  });
-
-  // Build recursive tree for nested comments
-  const commentMap = new Map();
-  const rootComments: any[] = [];
-
-  comments.forEach((comment) => {
-    commentMap.set(comment.id, { ...comment, children: [] });
-  });
-
-  comments.forEach((comment) => {
-    if (comment.parentId && commentMap.has(comment.parentId)) {
-      commentMap.get(comment.parentId).children.push(commentMap.get(comment.id));
-    } else if (!comment.parentId) {
-      rootComments.push(commentMap.get(comment.id));
-    }
-  });
-
-  return rootComments;
+      orderBy: { createdAt: "desc" },
+      include: {
+        author: {
+          select: { id: true, name: true, image: true, bio: true, bioKhmer: true },
+        },
+        children: {
+          where: { status: "APPROVED" },
+          orderBy: { createdAt: "asc" },
+          include: {
+            author: {
+              select: { id: true, name: true, image: true, bio: true, bioKhmer: true },
+            },
+          },
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Failed to fetch article comments:", error);
+    return [];
+  }
 }
 
-export async function addComment(
+export async function createComment(
   articleId: string,
   content: string,
   parentId?: string
 ): Promise<ApiResponse> {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
-    return { success: false, error: "Please log in to submit a comment." };
+    return { success: false, error: "You must be signed in to post a comment." };
   }
 
-  if (!content || content.trim().length === 0) {
-    return { success: false, error: "Comment text cannot be empty." };
+  if (!content || !content.trim()) {
+    return { success: false, error: "Comment content cannot be empty." };
   }
 
-  const comment = await prisma.comment.create({
-    data: {
-      content: content.trim(),
-      articleId,
-      authorId: (session.user as any).id,
-      parentId: parentId || null,
-      status: "APPROVED", // Auto approve for active users
-    },
-    include: {
-      author: {
-        select: { id: true, name: true, image: true, role: true },
+  try {
+    const comment = await prisma.comment.create({
+      data: {
+        content: content.trim(),
+        articleId,
+        authorId: (session.user as any).id,
+        parentId: parentId || null,
+        status: "APPROVED",
       },
-    },
-  });
+      include: {
+        author: {
+          select: { id: true, name: true, image: true, bio: true, bioKhmer: true },
+        },
+      },
+    });
 
-  const article = await prisma.article.findUnique({
-    where: { id: articleId },
-    select: { slug: true },
-  });
-
-  if (article) {
-    revalidatePath(`/articles/${article.slug}`);
+    return { success: true, data: comment };
+  } catch (error: any) {
+    return { success: false, error: error.message || "Failed to post comment." };
   }
+}
 
-  return { success: true, data: comment, message: "Comment posted." };
+export const addComment = createComment;
+
+export async function getAllCommentsAdmin() {
+  try {
+    return await prisma.comment.findMany({
+      orderBy: { createdAt: "desc" },
+      include: {
+        author: {
+          select: { id: true, name: true, image: true, email: true },
+        },
+        article: {
+          select: { id: true, title: true, slug: true },
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Failed to fetch admin comments:", error);
+    return [];
+  }
+}
+
+export async function toggleCommentStatusAdmin(id: string): Promise<ApiResponse> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) return { success: false, error: "Unauthorized." };
+
+  try {
+    const existing = await prisma.comment.findUnique({ where: { id } });
+    if (!existing) return { success: false, error: "Comment not found." };
+
+    const updated = await prisma.comment.update({
+      where: { id },
+      data: { status: existing.status === "APPROVED" ? "REJECTED" : "APPROVED" },
+    });
+
+    return { success: true, data: updated };
+  } catch (error: any) {
+    return { success: false, error: error.message || "Failed to toggle comment status." };
+  }
+}
+
+export async function deleteCommentAdmin(id: string): Promise<ApiResponse> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) return { success: false, error: "Unauthorized." };
+
+  try {
+    await prisma.comment.delete({ where: { id } });
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message || "Failed to delete comment." };
+  }
 }

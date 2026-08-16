@@ -56,10 +56,19 @@ export default async function AdminArticlesPage() {
           <tbody className="divide-y divide-slate-100">
             {articles.map((article) => (
               <tr key={article.id} className="hover:bg-slate-50 transition-colors">
-                <td className="p-4 font-semibold text-slate-900 max-w-xs truncate">
-                  {article.title}
+                <td className="p-4 font-semibold text-slate-900 max-w-xs">
+                  <div className="font-bold text-slate-900 truncate">
+                    {article.titleKhmer ? article.titleKhmer : article.title}
+                  </div>
+                  {article.titleKhmer && article.title && article.title !== article.titleKhmer && (
+                    <div className="text-[11px] font-normal text-slate-400 truncate">
+                      {article.title}
+                    </div>
+                  )}
                 </td>
-                <td className="p-4 text-slate-500">{article.category.name}</td>
+                <td className="p-4 text-slate-500">
+                  {article.category.nameKhmer ? `${article.category.nameKhmer} (${article.category.name})` : article.category.name}
+                </td>
                 <td className="p-4 text-slate-500">{article.author.name}</td>
                 
                 {/* Active / Inactive Status Toggle */}

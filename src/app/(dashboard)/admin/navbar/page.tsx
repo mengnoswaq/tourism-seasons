@@ -5,8 +5,44 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Menu } from "lucide-react";
 import { NavbarManager } from "@/components/admin/navbar-manager";
 
+import { prisma } from "@/lib/prisma";
+
 export default async function AdminNavbarPage() {
-  const navItems = await getAllNavItems();
+  const [navItems, rawCategories, rawArticles, rawProvinces] = await Promise.all([
+    getAllNavItems(),
+    prisma.category.findMany({
+      orderBy: { name: "asc" },
+      select: { id: true, name: true, slug: true },
+    }),
+    prisma.article.findMany({
+      where: { published: true },
+      orderBy: { createdAt: "desc" },
+      take: 50,
+      select: { id: true, title: true, slug: true },
+    }),
+    prisma.province.findMany({
+      orderBy: { name: "asc" },
+      select: { id: true, name: true, nameKhmer: true, slug: true },
+    }),
+  ]);
+
+  const formattedCategories = rawCategories.map((c) => ({
+    id: c.id,
+    name: c.name || "Category",
+    slug: c.slug,
+  }));
+
+  const formattedArticles = rawArticles.map((a) => ({
+    id: a.id,
+    title: a.title || "Article",
+    slug: a.slug,
+  }));
+
+  const formattedProvinces = rawProvinces.map((p) => ({
+    id: p.id,
+    name: p.name || p.nameKhmer || "Province",
+    slug: p.slug,
+  }));
 
   return (
     <div className="space-y-8">
@@ -28,13 +64,19 @@ export default async function AdminNavbarPage() {
             </div>
             <h1 className="text-2xl font-black text-slate-900">Header Navigation Bar Management</h1>
             <p className="text-xs text-slate-500">
-              Add new links, edit menu items, adjust display order, and toggle Active/Inactive visibility
+              Decoupled multi-data type menu management. Support Categories, Specific Articles, Tags, System Routes & Custom URLs.
             </p>
           </div>
         </div>
       </div>
 
-      <NavbarManager initialItems={navItems} />
+      <NavbarManager
+        initialItems={navItems}
+        categories={formattedCategories}
+        articles={formattedArticles}
+        provinces={formattedProvinces}
+      />
+
 
     </div>
   );

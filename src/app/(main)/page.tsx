@@ -6,6 +6,7 @@ import { getSiteSettings } from "@/actions/settings";
 import { NewsTicker } from "@/components/layout/ticker";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
+import { LatestHeadlinesHeader } from "@/components/news/latest-headlines-header";
 import { HeroFeatured } from "@/components/news/hero-featured";
 import { ArticleCard } from "@/components/news/article-card";
 import { TrendingWidget } from "@/components/news/trending-widget";
@@ -44,18 +45,19 @@ export default async function HomePage() {
           
           {/* Left Column: Latest News Grid */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-              <h2 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-                <Newspaper className="w-5 h-5 text-[#2791F5]" /> Latest Headlines
-              </h2>
-              <span className="text-xs text-slate-400 font-semibold uppercase">Updated Real-Time</span>
-            </div>
+            <LatestHeadlinesHeader />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {regularArticles.map((article) => (
-                <ArticleCard key={article.id} article={article} />
-              ))}
-            </div>
+            {regularArticles.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {regularArticles.map((article) => (
+                  <ArticleCard key={article.id} article={article} />
+                ))}
+              </div>
+            ) : (
+              <div className="p-8 text-center text-slate-500 bg-white rounded-xl border border-slate-200/60 shadow-sm">
+                No additional headlines to display. Publish more articles to see them listed here.
+              </div>
+            )}
           </div>
 
           {/* Right Column: Trending Sidebar */}

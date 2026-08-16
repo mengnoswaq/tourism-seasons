@@ -5,6 +5,8 @@ import { Zap } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 
+import { useLanguage } from "@/context/language-context";
+
 interface HeadlineItem {
   title: string;
   slug?: string;
@@ -16,6 +18,7 @@ interface TickerProps {
 
 export function NewsTicker({ headlines: propHeadlines }: TickerProps) {
   const pathname = usePathname();
+  const { t } = useLanguage();
   const [mounted, setMounted] = useState(false);
   const [items, setItems] = useState<HeadlineItem[]>([]);
 
@@ -56,7 +59,7 @@ export function NewsTicker({ headlines: propHeadlines }: TickerProps) {
     <div className="bg-[#0b1329] text-white text-xs py-2 px-4 flex items-center gap-3 border-b border-slate-800/80 overflow-hidden select-none">
       <div className="flex items-center gap-1.5 font-black uppercase tracking-wider text-red-400 shrink-0 bg-red-950/70 border border-red-800/50 px-2.5 py-1 rounded-md text-[11px] shadow-sm">
         <Zap className="w-3.5 h-3.5 animate-pulse text-red-500 fill-red-500" />
-        <span>BREAKING</span>
+        <span>{t("BREAKING", "ព័ត៌មានទាន់ហេតុការណ៍")}</span>
       </div>
       <div className="overflow-hidden relative w-full">
         <div className="whitespace-nowrap animate-marquee flex items-center gap-8 text-slate-300 font-medium">

@@ -8,8 +8,8 @@ import { MessageSquare, CornerDownRight, Send } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { addComment } from "@/actions/comments";
 import { CommentWithAuthor } from "@/types";
-
 import { useToast } from "@/components/ui/toast";
+import { useLanguage } from "@/context/language-context";
 
 interface CommentSectionProps {
   articleId: string;
@@ -19,6 +19,8 @@ interface CommentSectionProps {
 export function CommentSection({ articleId, initialComments }: CommentSectionProps) {
   const { data: session } = useSession();
   const toast = useToast();
+  const { t } = useLanguage();
+
   const [comments, setComments] = useState<CommentWithAuthor[]>(initialComments);
   const [mainContent, setMainContent] = useState("");
   const [replyingToId, setReplyingToId] = useState<string | null>(null);
@@ -33,7 +35,12 @@ export function CommentSection({ articleId, initialComments }: CommentSectionPro
     const res = await addComment(articleId, text, parentId);
 
     if (res.success && res.data) {
-      toast.success(parentId ? "Reply posted successfully!" : "Comment posted successfully!", "Comment Published");
+      toast.success(
+        parentId
+          ? t("Reply posted successfully!", "បានផ្ញើការឆ្លើយតបរួចរាល់!")
+          : t("Comment posted successfully!", "បានផ្ញើមតិរួចរាល់!"),
+        t("Comment Published", "បានចេញផ្សាយមតិ")
+      );
       if (parentId) {
         setReplyContent("");
         setReplyingToId(null);
@@ -51,8 +58,8 @@ export function CommentSection({ articleId, initialComments }: CommentSectionPro
   return (
     <section className="mt-12 pt-8 border-t border-slate-200 dark:border-slate-800 space-y-8">
       <div className="flex items-center gap-2 text-xl font-bold text-slate-900 dark:text-white">
-        <MessageSquare className="w-5 h-5 text-blue-600" />
-        <h2>Discussion & Comments ({comments.length})</h2>
+        <MessageSquare className="w-5 h-5 text-[#2791F5]" />
+        <h2>{t("Discussion & Comments", "ការពិភាក្សា & មតិយោបល់")} ({comments.length})</h2>
       </div>
 
       {/* Main Comment Box */}
@@ -62,20 +69,20 @@ export function CommentSection({ articleId, initialComments }: CommentSectionPro
           <div className="flex-1 space-y-3">
             <textarea
               rows={3}
-              placeholder="Join the discussion... Share your perspective."
+              placeholder={t("Join the discussion... Share your perspective.", "ចូលរួមការពិភាក្សា... ចែករំលែកមតិរបស់អ្នក។")}
               value={mainContent}
               onChange={(e) => setMainContent(e.target.value)}
-              className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2791F5]/50"
             />
             <div className="flex justify-end">
               <Button
                 variant="primary"
                 size="sm"
-                className="gap-2"
+                className="gap-2 font-bold text-xs"
                 onClick={() => handlePostComment()}
                 disabled={isSubmitting || !mainContent.trim()}
               >
-                <Send className="w-3.5 h-3.5" /> Post Comment
+                <Send className="w-3.5 h-3.5" /> {t("Post Comment", "បញ្ជូនមតិ")}
               </Button>
             </div>
           </div>
@@ -83,10 +90,10 @@ export function CommentSection({ articleId, initialComments }: CommentSectionPro
       ) : (
         <div className="bg-slate-100 dark:bg-slate-900 p-6 rounded-2xl text-center space-y-3 border border-slate-200 dark:border-slate-800">
           <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
-            Sign in to join the conversation and leave a comment.
+            {t("Sign in to join the conversation and leave a comment.", "សូមចូលគណនីដើម្បីចូលរួមបញ្ចេញមតិ។")}
           </p>
           <Button variant="outline" size="sm" onClick={() => (window.location.href = "/login")}>
-            Sign In to Comment
+            {t("Sign In to Comment", "ចូលគណនីដើម្បីបញ្ចេញមតិ")}
           </Button>
         </div>
       )}
@@ -130,6 +137,7 @@ function CommentItem({
   isSubmitting: boolean;
   sessionUser: any;
 }) {
+  const { t } = useLanguage();
   const isReplying = replyingToId === comment.id;
 
   return (
@@ -152,9 +160,9 @@ function CommentItem({
           {sessionUser && (
             <button
               onClick={() => setReplyingToId(isReplying ? null : comment.id)}
-              className="text-[11px] font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 mt-2"
+              className="text-[11px] font-semibold text-[#2791F5] hover:underline flex items-center gap-1 mt-2 cursor-pointer"
             >
-              <CornerDownRight className="w-3 h-3" /> Reply
+              <CornerDownRight className="w-3 h-3" /> {t("Reply", "ឆ្លើយតប")}
             </button>
           )}
 
@@ -163,14 +171,14 @@ function CommentItem({
             <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
               <textarea
                 rows={2}
-                placeholder={`Reply to ${comment.author.name}...`}
+                placeholder={`${t("Reply to", "ឆ្លើយតបទៅកាន់")} ${comment.author.name}...`}
                 value={replyContent}
                 onChange={(e) => setReplyContent(e.target.value)}
                 className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2 text-xs text-slate-900 dark:text-white focus:outline-none"
               />
               <div className="flex justify-end gap-2">
                 <Button variant="ghost" size="sm" onClick={() => setReplyingToId(null)}>
-                  Cancel
+                  {t("Cancel", "បោះបង់")}
                 </Button>
                 <Button
                   variant="primary"
@@ -178,7 +186,7 @@ function CommentItem({
                   onClick={() => onPostReply(comment.id)}
                   disabled={isSubmitting || !replyContent.trim()}
                 >
-                  Post Reply
+                  {t("Post Reply", "បញ្ជូនការឆ្លើយតប")}
                 </Button>
               </div>
             </div>
@@ -186,7 +194,7 @@ function CommentItem({
         </div>
       </div>
 
-      {/* Recursive Children (Nested Threading) */}
+      {/* Recursive Children */}
       {comment.children && comment.children.length > 0 && (
         <div className="pl-6 sm:pl-10 space-y-3 border-l-2 border-slate-100 dark:border-slate-800">
           {comment.children.map((child) => (

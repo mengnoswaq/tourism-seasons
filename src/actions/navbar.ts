@@ -7,31 +7,24 @@ import { authOptions, hasPermission } from "@/lib/auth";
 import { ApiResponse } from "@/types";
 import { redirect } from "next/navigation";
 
+export interface NavItemInput {
+  label: string;
+  labelKhmer?: string | null;
+  type?: string;
+  targetId?: string | null;
+  url: string;
+  order?: number;
+  status?: string;
+}
+
 export async function getNavItems() {
   try {
-    const items = await prisma.navItem.findMany({
+    return await prisma.navItem.findMany({
       where: { status: "ACTIVE" },
       orderBy: { order: "asc" },
     });
-    if (items.length > 0) return items;
-
-    return [
-      { id: "1", label: "All News", url: "/", order: 1, status: "ACTIVE" },
-      { id: "2", label: "Technology", url: "/category/technology", order: 2, status: "ACTIVE" },
-      { id: "3", label: "World", url: "/category/world", order: 3, status: "ACTIVE" },
-      { id: "4", label: "Business", url: "/category/business", order: 4, status: "ACTIVE" },
-      { id: "5", label: "Culture", url: "/category/culture", order: 5, status: "ACTIVE" },
-      { id: "6", label: "Science", url: "/category/science", order: 6, status: "ACTIVE" },
-    ];
   } catch (error) {
-    return [
-      { id: "1", label: "All News", url: "/", order: 1, status: "ACTIVE" },
-      { id: "2", label: "Technology", url: "/category/technology", order: 2, status: "ACTIVE" },
-      { id: "3", label: "World", url: "/category/world", order: 3, status: "ACTIVE" },
-      { id: "4", label: "Business", url: "/category/business", order: 4, status: "ACTIVE" },
-      { id: "5", label: "Culture", url: "/category/culture", order: 5, status: "ACTIVE" },
-      { id: "6", label: "Science", url: "/category/science", order: 6, status: "ACTIVE" },
-    ];
+    return [];
   }
 }
 
@@ -55,7 +48,7 @@ export async function getAllNavItems() {
   }
 }
 
-export async function createNavItem(label: string, url: string, order?: number): Promise<ApiResponse> {
+export async function createNavItem(data: NavItemInput): Promise<ApiResponse> {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     return { success: false, error: "Unauthorized. Please log in." };
@@ -66,17 +59,20 @@ export async function createNavItem(label: string, url: string, order?: number):
     return { success: false, error: "Permission denied. Only Super Admin or Admin can add navbar items." };
   }
 
-  if (!label || !url) {
+  if (!data.label || !data.url) {
     return { success: false, error: "Label and URL are required." };
   }
 
   try {
     await prisma.navItem.create({
       data: {
-        label,
-        url,
-        order: order || 0,
-        status: "ACTIVE",
+        label: data.label.trim(),
+        labelKhmer: data.labelKhmer?.trim() || null,
+        type: data.type || "CUSTOM",
+        targetId: data.targetId || null,
+        url: data.url.trim(),
+        order: data.order || 0,
+        status: data.status || "ACTIVE",
       },
     });
 
@@ -118,7 +114,7 @@ export async function toggleNavItemStatus(id: string): Promise<ApiResponse> {
   return { success: true, message: `Navbar item status updated to ${newStatus}.` };
 }
 
-export async function updateNavItem(id: string, label: string, url: string, order?: number): Promise<ApiResponse> {
+export async function updateNavItem(id: string, data: NavItemInput): Promise<ApiResponse> {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     return { success: false, error: "Unauthorized. Please log in." };
@@ -129,7 +125,7 @@ export async function updateNavItem(id: string, label: string, url: string, orde
     return { success: false, error: "Permission denied. Only Super Admin or Admin can edit navbar items." };
   }
 
-  if (!label || !url) {
+  if (!data.label || !data.url) {
     return { success: false, error: "Label and URL are required." };
   }
 
@@ -137,9 +133,13 @@ export async function updateNavItem(id: string, label: string, url: string, orde
     await prisma.navItem.update({
       where: { id },
       data: {
-        label,
-        url,
-        order: order !== undefined ? order : 0,
+        label: data.label.trim(),
+        labelKhmer: data.labelKhmer?.trim() || null,
+        type: data.type || "CUSTOM",
+        targetId: data.targetId || null,
+        url: data.url.trim(),
+        order: data.order !== undefined ? data.order : 0,
+        status: data.status || "ACTIVE",
       },
     });
 
@@ -172,5 +172,58 @@ export async function deleteNavItem(id: string): Promise<ApiResponse> {
     return { success: true, message: "Navbar item deleted." };
   } catch (error: any) {
     return { success: false, error: error?.message || "Failed to delete navbar item." };
+  }
+}
+
+export async function reorderNavItems(items: { id: string; order: number }[]): Promise<ApiResponse> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    return { success: false, error: "Unauthorized. Please log in." };
+  }
+
+  const userRole = (session.user as any).role as string;
+  if (!hasPermission(userRole, ["SUPERADMIN", "ADMIN"])) {
+    return { success: false, error: "Permission denied." };
+  }
+
+  try {
+    await prisma.$transaction(
+      items.map((item) =>
+        prisma.navItem.update({
+          where: { id: item.id },
+          data: { order: item.order },
+        })
+      )
+    );
+
+    revalidatePath("/", "layout");
+    revalidatePath("/admin/navbar");
+
+    return { success: true, message: "Navbar order updated successfully." };
+  } catch (error: any) {
+    return { success: false, error: error?.message || "Failed to reorder navbar items." };
+  }
+}
+
+export async function deleteAllNavItems(): Promise<ApiResponse> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    return { success: false, error: "Unauthorized. Please log in." };
+  }
+
+  const userRole = (session.user as any).role as string;
+  if (!hasPermission(userRole, ["SUPERADMIN", "ADMIN"])) {
+    return { success: false, error: "Permission denied. Only Super Admin or Admin can clear navbar items." };
+  }
+
+  try {
+    await prisma.navItem.deleteMany({});
+
+    revalidatePath("/", "layout");
+    revalidatePath("/admin/navbar");
+
+    return { success: true, message: "All navbar items have been deleted." };
+  } catch (error: any) {
+    return { success: false, error: error?.message || "Failed to clear navbar items." };
   }
 }

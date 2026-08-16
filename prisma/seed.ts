@@ -85,16 +85,7 @@ async function main() {
     },
   });
 
-  // 4. Create Tags
-  const tags = ["AI", "NextJS", "Quantum Computing", "Economy", "Climate", "SpaceX"];
-  for (const tag of tags) {
-    const slug = tag.toLowerCase().replace(/\s+/g, "-");
-    await prisma.tag.upsert({
-      where: { slug },
-      update: {},
-      create: { name: tag, slug },
-    });
-  }
+
 
   // 5. Create Articles
   const techCategory = await prisma.category.findUnique({ where: { slug: "technology" } });
