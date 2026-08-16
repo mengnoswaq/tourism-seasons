@@ -23,14 +23,18 @@ export default function LoginPage() {
 
     try {
       const res = await signIn("credentials", {
-        email,
+        email: email.trim().toLowerCase(),
         password,
         redirect: false,
       });
 
       if (res?.error) {
-        setError(res.error);
-      } else {
+        if (res.error === "CredentialsSignin") {
+          setError("Invalid email or password. Please check your credentials.");
+        } else {
+          setError(res.error);
+        }
+      } else if (res?.ok) {
         router.push("/");
         router.refresh();
       }
