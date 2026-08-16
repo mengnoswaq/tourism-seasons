@@ -49,7 +49,7 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
 
     setIsUploadingLogo(true);
     try {
-      const dataUrl = await uploadImage(file, { maxWidth: 800, quality: 0.9 });
+      const dataUrl = await uploadImage(file, { maxWidth: 1920, quality: 0.95 });
       setLogoUrl(dataUrl);
       toast.success("Main logo uploaded successfully! Preview updated.");
     } catch (err) {

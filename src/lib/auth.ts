@@ -30,11 +30,17 @@ const providers: any[] = [
         throw new Error("Incorrect password");
       }
 
+      // Sanitize avatar image to prevent large Base64 URLs from entering NextAuth JWT token cookies
+      const sanitizedImage =
+        user.image && (user.image.startsWith("data:") || user.image.length > 500)
+          ? null
+          : user.image;
+
       return {
         id: user.id,
         email: user.email,
         name: user.name,
-        image: user.image,
+        image: sanitizedImage,
         role: user.role,
       };
     },
@@ -64,15 +70,30 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.role = (user as any).role || "SUBSCRIBER";
       }
-      if (trigger === "update" && session?.name) {
-        token.name = session.name;
+      if (trigger === "update" && session) {
+        if (session.name) token.name = session.name;
       }
+
+      // CRITICAL FIX FOR 494 REQUEST_HEADER_TOO_LARGE:
+      // Prevent Base64 Data URLs and oversized strings from inflating JWT session cookies
+      if (typeof token.picture === "string" && (token.picture.startsWith("data:") || token.picture.length > 500)) {
+        delete token.picture;
+      }
+      if (typeof token.image === "string" && ((token.image as string).startsWith("data:") || (token.image as string).length > 500)) {
+        delete token.image;
+      }
+
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         (session.user as any).id = token.id;
         (session.user as any).role = token.role;
+
+        // Ensure session.user.image is not an oversized Base64 string
+        if (typeof session.user.image === "string" && (session.user.image.startsWith("data:") || session.user.image.length > 500)) {
+          session.user.image = null;
+        }
       }
       return session;
     },

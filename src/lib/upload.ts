@@ -1,13 +1,13 @@
 /**
  * Media upload helper module for profile photos, article cover images & media assets.
- * Converts the uploaded image file into a compressed Base64 Data URL (WebP/JPEG format),
- * keeping the full image aspect ratio with auto-calculated height and uncropped quality.
+ * Converts the uploaded image file into a high-quality Base64 Data URL (WebP format with JPEG fallback),
+ * retaining full resolution up to high-definition (1920px+) with uncropped high quality.
  */
 export async function uploadImage(
   file: File,
   options: { maxWidth?: number; quality?: number } = {}
 ): Promise<string> {
-  const { maxWidth = 600, quality = 0.85 } = options;
+  const { maxWidth = 1920, quality = 0.95 } = options;
 
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -19,7 +19,7 @@ export async function uploadImage(
         let width = img.width;
         let height = img.height;
 
-        // Auto scale height proportionally if width exceeds maxWidth
+        // Auto scale height proportionally only if width exceeds maxWidth (e.g. 1920px)
         if (width > maxWidth) {
           height = Math.round((height * maxWidth) / width);
           width = maxWidth;
@@ -34,10 +34,14 @@ export async function uploadImage(
           return reject(new Error("Failed to get 2D canvas context"));
         }
 
+        // Enable high quality image smoothing
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+
         // Draw full image onto canvas without cropping
         ctx.drawImage(img, 0, 0, width, height);
 
-        // Convert canvas to compressed WebP (fallback to JPEG if WebP unsupported)
+        // Convert canvas to high-quality compressed WebP (fallback to JPEG if WebP unsupported)
         let dataUrl = canvas.toDataURL("image/webp", quality);
         if (!dataUrl.startsWith("data:image/webp")) {
           dataUrl = canvas.toDataURL("image/jpeg", quality);
