@@ -6,7 +6,7 @@ import { ApiResponse } from "@/types";
 import { sendEmail, generateVerificationHtml } from "@/lib/mail";
 
 // Helper function to validate real email addresses
-export function isRealEmail(email: string): boolean {
+function isRealEmail(email: string): boolean {
   if (!email) return false;
   const emailLower = email.trim().toLowerCase();
   
