@@ -1,25 +1,49 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { Mail, Lock, LogIn, Chrome } from "lucide-react";
+import { Mail, Lock, LogIn, Chrome, Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  // Load remembered email on component mount
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("tourism_remembered_email");
+    const savedRemember = localStorage.getItem("tourism_remember_me");
+
+    if (savedEmail) {
+      setEmail(savedEmail);
+    }
+    if (savedRemember !== null) {
+      setRememberMe(savedRemember === "true");
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
+
+    // Save or clear remembered email
+    if (rememberMe) {
+      localStorage.setItem("tourism_remembered_email", email.trim().toLowerCase());
+      localStorage.setItem("tourism_remember_me", "true");
+    } else {
+      localStorage.removeItem("tourism_remembered_email");
+      localStorage.setItem("tourism_remember_me", "false");
+    }
 
     try {
       const res = await signIn("credentials", {
@@ -89,13 +113,37 @@ export default function LoginPage() {
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                 Password
               </label>
-              <Input
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+              <div className="relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                  title={showPassword ? "Hide Password" : "Show Password"}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Remember Me Checkbox */}
+            <div className="flex items-center justify-between pt-1">
+              <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-600 dark:text-slate-400 select-none">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 rounded border-slate-300 text-[#2791F5] focus:ring-[#2791F5] cursor-pointer"
+                />
+                <span>Remember me</span>
+              </label>
             </div>
 
             <Button variant="primary" className="w-full gap-2 py-2.5 font-bold" type="submit" disabled={isLoading}>

@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { ApiResponse } from "@/types";
+import bcrypt from "bcryptjs";
 
 export async function updateProfile(formData: FormData): Promise<ApiResponse> {
   const session = await getServerSession(authOptions);
@@ -48,5 +49,66 @@ export async function updateProfile(formData: FormData): Promise<ApiResponse> {
     return { success: true, message: "Profile updated successfully!" };
   } catch (error) {
     return { success: false, error: "Failed to update profile details." };
+  }
+}
+
+export async function changePassword(formData: FormData): Promise<ApiResponse> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    return { success: false, error: "Unauthorized. Please log in first." };
+  }
+
+  const userId = (session.user as any).id;
+  const currentPassword = formData.get("currentPassword") as string;
+  const newPassword = formData.get("newPassword") as string;
+  const confirmPassword = formData.get("confirmPassword") as string;
+
+  if (!newPassword || newPassword.length < 6) {
+    return { success: false, error: "New password must be at least 6 characters long." };
+  }
+
+  if (newPassword !== confirmPassword) {
+    return { success: false, error: "New password and confirm password do not match." };
+  }
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { passwordHash: true },
+    });
+
+    if (!user) {
+      return { success: false, error: "User account not found." };
+    }
+
+    // If user has an existing password, verify current password
+    if (user.passwordHash) {
+      if (!currentPassword) {
+        return { success: false, error: "Current password is required." };
+      }
+
+      const isValid = await bcrypt.compare(currentPassword, user.passwordHash);
+      if (!isValid) {
+        return { success: false, error: "Incorrect current password. Please try again." };
+      }
+    }
+
+    // Hash the new password and update in database
+    const newPasswordHash = await bcrypt.hash(newPassword, 10);
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        passwordHash: newPasswordHash,
+      },
+    });
+
+    revalidatePath("/profile");
+    revalidatePath("/admin/profile");
+
+    return { success: true, message: "Password updated successfully!" };
+  } catch (error) {
+    console.error("Change Password Error:", error);
+    return { success: false, error: "Failed to update password. Please try again." };
   }
 }

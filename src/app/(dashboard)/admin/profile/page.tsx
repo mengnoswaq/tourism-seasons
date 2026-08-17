@@ -3,14 +3,14 @@
 import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { updateProfile } from "@/actions/profile";
+import { updateProfile, changePassword } from "@/actions/profile";
 import { uploadImage } from "@/lib/upload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
-import { User, Upload, ShieldCheck, Mail, Trash2, CheckCircle2, UserCircle } from "lucide-react";
+import { User, Upload, ShieldCheck, Mail, Trash2, CheckCircle2, UserCircle, Lock, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
 import { useLanguage } from "@/context/language-context";
 
@@ -28,6 +28,16 @@ export default function AdminProfilePage() {
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<{ text: string; isError: boolean } | null>(null);
+
+  // Password Change States
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showCurrentPass, setShowCurrentPass] = useState(false);
+  const [showNewPass, setShowNewPass] = useState(false);
+  const [showConfirmPass, setShowConfirmPass] = useState(false);
+  const [isChangingPass, setIsChangingPass] = useState(false);
+  const [passMessage, setPassMessage] = useState<{ text: string; isError: boolean } | null>(null);
 
   useEffect(() => {
     if (session?.user) {
@@ -78,6 +88,60 @@ export default function AdminProfilePage() {
     setSelectedFile(null);
     setPreviewUrl("");
     setImageUrl("");
+  };
+
+  const handlePasswordSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setPassMessage(null);
+
+    if (newPassword.length < 6) {
+      toast.error(
+        t("New password must be at least 6 characters long.", "ពាក្យសម្ងាត់ថ្មីត្រូវមានយ៉ាងហោចណាស់ ៦ តួអក្សរ។"),
+        t("Password Error", "កំហុសពាក្យសម្ងាត់")
+      );
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error(
+        t("New password and confirm password do not match.", "ពាក្យសម្ងាត់ថ្មី និងការបញ្ជាក់មិនត្រូវគ្នាទេ។"),
+        t("Password Error", "កំហុសពាក្យសម្ងាត់")
+      );
+      return;
+    }
+
+    setIsChangingPass(true);
+
+    const formData = new FormData();
+    formData.set("currentPassword", currentPassword);
+    formData.set("newPassword", newPassword);
+    formData.set("confirmPassword", confirmPassword);
+
+    const res = await changePassword(formData);
+
+    if (res.success) {
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setPassMessage({
+        text: t("Password updated successfully!", "បានប្តូរពាក្យសម្ងាត់ដោយជោគជ័យ!"),
+        isError: false,
+      });
+      toast.success(
+        t("Password updated successfully!", "បានប្តូរពាក្យសម្ងាត់ដោយជោគជ័យ!"),
+        t("Security Updated", "បានបច្ចុប្បន្នភាពសុវត្ថិភាព")
+      );
+    } else {
+      setPassMessage({
+        text: res.error || t("Failed to update password.", "បរាជ័យក្នុងការប្តូរពាក្យសម្ងាត់។"),
+        isError: true,
+      });
+      toast.error(
+        res.error || t("Failed to update password.", "បរាជ័យក្នុងការប្តូរពាក្យសម្ងាត់។"),
+        t("Password Error", "កំហុសពាក្យសម្ងាត់")
+      );
+    }
+    setIsChangingPass(false);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -287,6 +351,124 @@ export default function AdminProfilePage() {
               >
                 <CheckCircle2 className="w-4 h-4" />
                 {isSubmitting ? t("Saving Changes...", "កំពុងរក្សាទុក...") : t("Save Profile Details", "រក្សាទុកព័ត៌មានប្រវត្តិរូប")}
+              </Button>
+            </div>
+          </form>
+        </Card>
+
+        {/* Change Password Card */}
+        <Card className="lg:col-span-3 bg-white border border-slate-200 shadow-sm p-6 sm:p-8 rounded-2xl space-y-6">
+          <div className="border-b border-slate-100 pb-4">
+            <div className="flex items-center gap-2 mb-1">
+              <Lock className="w-4 h-4 text-[#2791F5]" />
+              <span className="text-xs font-bold uppercase tracking-wider text-[#2791F5]">
+                {t("Security & Privacy", "សុវត្ថិភាព & ឯកជនភាព")}
+              </span>
+            </div>
+            <h2 className="text-xl font-bold text-slate-900">
+              {t("Change Password", "ប្តូរពាក្យសម្ងាត់")}
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              {t("Update your password to keep your admin account secure", "ធ្វើបច្ចុប្បន្នភាពពាក្យសម្ងាត់ដើម្បីរក្សាសុវត្ថិភាពគណនីរបស់អ្នក")}
+            </p>
+          </div>
+
+          <form onSubmit={handlePasswordSubmit} className="space-y-5 max-w-2xl">
+            {passMessage && (
+              <div
+                className={`p-4 rounded-xl text-xs font-semibold border flex items-center gap-2 ${
+                  passMessage.isError
+                    ? "bg-red-50 text-red-600 border-red-200"
+                    : "bg-emerald-50 text-emerald-600 border-emerald-200"
+                }`}
+              >
+                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                <span>{passMessage.text}</span>
+              </div>
+            )}
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                {t("Current Password", "ពាក្យសម្ងាត់បច្ចុប្បន្ន")}
+              </label>
+              <div className="relative">
+                <Input
+                  type={showCurrentPass ? "text" : "password"}
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="py-2.5 pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrentPass(!showCurrentPass)}
+                  className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-600 transition-colors"
+                  title={showCurrentPass ? "Hide Password" : "Show Password"}
+                >
+                  {showCurrentPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                  {t("New Password", "ពាក្យសម្ងាត់ថ្មី")} *
+                </label>
+                <div className="relative">
+                  <Input
+                    type={showNewPass ? "text" : "password"}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Min 6 characters..."
+                    required
+                    className="py-2.5 pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPass(!showNewPass)}
+                    className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-600 transition-colors"
+                    title={showNewPass ? "Hide Password" : "Show Password"}
+                  >
+                    {showNewPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                  {t("Confirm New Password", "បញ្ជាក់ពាក្យសម្ងាត់ថ្មី")} *
+                </label>
+                <div className="relative">
+                  <Input
+                    type={showConfirmPass ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Min 6 characters..."
+                    required
+                    className="py-2.5 pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPass(!showConfirmPass)}
+                    className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-600 transition-colors"
+                    title={showConfirmPass ? "Hide Password" : "Show Password"}
+                  >
+                    {showConfirmPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <Button
+                variant="outline"
+                type="submit"
+                disabled={isChangingPass}
+                className="font-bold py-2.5 px-6 gap-2 border-slate-300 hover:bg-slate-50 text-slate-800"
+              >
+                <Lock className="w-4 h-4 text-[#2791F5]" />
+                {isChangingPass ? t("Updating Password...", "កំពុងប្តូរពាក្យសម្ងាត់...") : t("Update Password", "ប្តូរពាក្យសម្ងាត់")}
               </Button>
             </div>
           </form>
