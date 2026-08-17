@@ -81,13 +81,15 @@ export async function changePassword(formData: FormData): Promise<ApiResponse> {
       return { success: false, error: "User account not found." };
     }
 
+    const hadExistingPassword = !!user.passwordHash;
+
     // If user has an existing password, verify current password
-    if (user.passwordHash) {
+    if (hadExistingPassword) {
       if (!currentPassword) {
         return { success: false, error: "Current password is required." };
       }
 
-      const isValid = await bcrypt.compare(currentPassword, user.passwordHash);
+      const isValid = await bcrypt.compare(currentPassword, user.passwordHash!);
       if (!isValid) {
         return { success: false, error: "Incorrect current password. Please try again." };
       }
@@ -106,7 +108,12 @@ export async function changePassword(formData: FormData): Promise<ApiResponse> {
     revalidatePath("/profile");
     revalidatePath("/admin/profile");
 
-    return { success: true, message: "Password updated successfully!" };
+    return {
+      success: true,
+      message: hadExistingPassword
+        ? "Password updated successfully!"
+        : "Password created successfully! You can now log in using either Google or your email & password.",
+    };
   } catch (error) {
     console.error("Change Password Error:", error);
     return { success: false, error: "Failed to update password. Please try again." };

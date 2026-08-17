@@ -30,6 +30,7 @@ export default function AdminProfilePage() {
   const [message, setMessage] = useState<{ text: string; isError: boolean } | null>(null);
 
   // Password Change States
+  const [hasPassword, setHasPassword] = useState(true);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -55,6 +56,7 @@ export default function AdminProfilePage() {
           setBio(data.user.bio || "");
           setImageUrl(data.user.image || "");
           setPreviewUrl(data.user.image || "");
+          setHasPassword(data.user.hasPassword ?? true);
         }
       })
       .catch(() => {});
@@ -94,6 +96,14 @@ export default function AdminProfilePage() {
     e.preventDefault();
     setPassMessage(null);
 
+    if (hasPassword && !currentPassword) {
+      toast.error(
+        t("Current password is required.", "ពាក្យសម្ងាត់បច្ចុប្បន្នត្រូវបានទាមទារ។"),
+        t("Password Error", "កំហុសពាក្យសម្ងាត់")
+      );
+      return;
+    }
+
     if (newPassword.length < 6) {
       toast.error(
         t("New password must be at least 6 characters long.", "ពាក្យសម្ងាត់ថ្មីត្រូវមានយ៉ាងហោចណាស់ ៦ តួអក្សរ។"),
@@ -123,12 +133,13 @@ export default function AdminProfilePage() {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
+      setHasPassword(true);
       setPassMessage({
-        text: t("Password updated successfully!", "បានប្តូរពាក្យសម្ងាត់ដោយជោគជ័យ!"),
+        text: res.message || t("Password updated successfully!", "បានប្តូរពាក្យសម្ងាត់ដោយជោគជ័យ!"),
         isError: false,
       });
       toast.success(
-        t("Password updated successfully!", "បានប្តូរពាក្យសម្ងាត់ដោយជោគជ័យ!"),
+        res.message || t("Password updated successfully!", "បានប្តូរពាក្យសម្ងាត់ដោយជោគជ័យ!"),
         t("Security Updated", "បានបច្ចុប្បន្នភាពសុវត្ថិភាព")
       );
     } else {
@@ -366,14 +377,30 @@ export default function AdminProfilePage() {
               </span>
             </div>
             <h2 className="text-xl font-bold text-slate-900">
-              {t("Change Password", "ប្តូរពាក្យសម្ងាត់")}
+              {hasPassword
+                ? t("Change Password", "ប្តូរពាក្យសម្ងាត់")
+                : t("Set Account Password", "បង្កើតពាក្យសម្ងាត់គណនី")}
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              {t("Update your password to keep your admin account secure", "ធ្វើបច្ចុប្បន្នភាពពាក្យសម្ងាត់ដើម្បីរក្សាសុវត្ថិភាពគណនីរបស់អ្នក")}
+              {hasPassword
+                ? t("Update your password to keep your admin account secure", "ធ្វើបច្ចុប្បន្នភាពពាក្យសម្ងាត់ដើម្បីរក្សាសុវត្ថិភាពគណនីរបស់អ្នក")
+                : t("Create a password to also log in using your email & password", "បង្កើតពាក្យសម្ងាត់ដើម្បីអាចចូលដោយប្រើអ៊ីមែល និងពាក្យសម្ងាត់បាន")}
             </p>
           </div>
 
           <form onSubmit={handlePasswordSubmit} className="space-y-5 max-w-2xl">
+            {!hasPassword && (
+              <div className="bg-blue-50 border border-blue-200 text-[#2791F5] p-4 rounded-xl text-xs font-semibold flex items-center gap-2.5">
+                <ShieldCheck className="w-4 h-4 shrink-0" />
+                <span>
+                  {t(
+                    "You signed in using a Google Account. You can create a password below to use both Google and email/password login for this project.",
+                    "អ្នកបានចូលដោយប្រើគណនី Google ។ អ្នកអាចបង្កើតពាក្យសម្ងាត់ខាងក្រោមដើម្បីប្រើទាំង Google និងអ៊ីមែល/ពាក្យសម្ងាត់សម្រាប់គម្រោងនេះ។"
+                  )}
+                </span>
+              </div>
+            )}
+
             {passMessage && (
               <div
                 className={`p-4 rounded-xl text-xs font-semibold border flex items-center gap-2 ${
@@ -387,33 +414,35 @@ export default function AdminProfilePage() {
               </div>
             )}
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                {t("Current Password", "ពាក្យសម្ងាត់បច្ចុប្បន្ន")}
-              </label>
-              <div className="relative">
-                <Input
-                  type={showCurrentPass ? "text" : "password"}
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="py-2.5 pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowCurrentPass(!showCurrentPass)}
-                  className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-600 transition-colors"
-                  title={showCurrentPass ? "Hide Password" : "Show Password"}
-                >
-                  {showCurrentPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
+            {hasPassword && (
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                  {t("Current Password", "ពាក្យសម្ងាត់បច្ចុប្បន្ន")}
+                </label>
+                <div className="relative">
+                  <Input
+                    type={showCurrentPass ? "text" : "password"}
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="py-2.5 pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrentPass(!showCurrentPass)}
+                    className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-600 transition-colors"
+                    title={showCurrentPass ? "Hide Password" : "Show Password"}
+                  >
+                    {showCurrentPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                  {t("New Password", "ពាក្យសម្ងាត់ថ្មី")} *
+                  {hasPassword ? t("New Password", "ពាក្យសម្ងាត់ថ្មី") : t("Password", "ពាក្យសម្ងាត់")} *
                 </label>
                 <div className="relative">
                   <Input
@@ -437,7 +466,7 @@ export default function AdminProfilePage() {
 
               <div className="space-y-1.5">
                 <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                  {t("Confirm New Password", "បញ្ជាក់ពាក្យសម្ងាត់ថ្មី")} *
+                  {hasPassword ? t("Confirm New Password", "បញ្ជាក់ពាក្យសម្ងាត់ថ្មី") : t("Confirm Password", "បញ្ជាក់ពាក្យសម្ងាត់")} *
                 </label>
                 <div className="relative">
                   <Input
@@ -460,7 +489,6 @@ export default function AdminProfilePage() {
               </div>
             </div>
 
-            <div className="pt-2">
               <Button
                 variant="outline"
                 type="submit"
@@ -468,7 +496,11 @@ export default function AdminProfilePage() {
                 className="font-bold py-2.5 px-6 gap-2 border-slate-300 hover:bg-slate-50 text-slate-800"
               >
                 <Lock className="w-4 h-4 text-[#2791F5]" />
-                {isChangingPass ? t("Updating Password...", "កំពុងប្តូរពាក្យសម្ងាត់...") : t("Update Password", "ប្តូរពាក្យសម្ងាត់")}
+                {isChangingPass
+                  ? t("Saving Password...", "កំពុងរក្សាទុកពាក្យសម្ងាត់...")
+                  : hasPassword
+                  ? t("Update Password", "ប្តូរពាក្យសម្ងាត់")
+                  : t("Create Account Password", "បង្កើតពាក្យសម្ងាត់គណនី")}
               </Button>
             </div>
           </form>
