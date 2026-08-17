@@ -100,48 +100,6 @@ export default function ProfilePage() {
     setImageUrl("");
   };
 
-  const handlePasswordSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setPassMessage(null);
-
-    if (hasPassword && !currentPassword) {
-      toast.error("Current password is required.", "Password Error");
-      return;
-    }
-
-    if (newPassword.length < 6) {
-      toast.error("New password must be at least 6 characters long.", "Password Error");
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      toast.error("New password and confirm password do not match.", "Password Error");
-      return;
-    }
-
-    setIsChangingPass(true);
-
-    const formData = new FormData();
-    formData.set("currentPassword", currentPassword);
-    formData.set("newPassword", newPassword);
-    formData.set("confirmPassword", confirmPassword);
-
-    const res = await changePassword(formData);
-
-    if (res.success) {
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-      setHasPassword(true);
-      setPassMessage({ text: res.message || "Password updated successfully!", isError: false });
-      toast.success(res.message || "Password updated successfully!", "Security Updated");
-    } else {
-      setPassMessage({ text: res.error || "Failed to update password.", isError: true });
-      toast.error(res.error || "Failed to update password.", "Password Error");
-    }
-    setIsChangingPass(false);
-  };
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setMessage(null);

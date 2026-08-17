@@ -80,69 +80,6 @@ export default function AdminProfilePage() {
     setImageUrl("");
   };
 
-  const handlePasswordSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setPassMessage(null);
-
-    if (hasPassword && !currentPassword) {
-      toast.error(
-        t("Current password is required.", "ពាក្យសម្ងាត់បច្ចុប្បន្នត្រូវបានទាមទារ។"),
-        t("Password Error", "កំហុសពាក្យសម្ងាត់")
-      );
-      return;
-    }
-
-    if (newPassword.length < 6) {
-      toast.error(
-        t("New password must be at least 6 characters long.", "ពាក្យសម្ងាត់ថ្មីត្រូវមានយ៉ាងហោចណាស់ ៦ តួអក្សរ។"),
-        t("Password Error", "កំហុសពាក្យសម្ងាត់")
-      );
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      toast.error(
-        t("New password and confirm password do not match.", "ពាក្យសម្ងាត់ថ្មី និងការបញ្ជាក់មិនត្រូវគ្នាទេ។"),
-        t("Password Error", "កំហុសពាក្យសម្ងាត់")
-      );
-      return;
-    }
-
-    setIsChangingPass(true);
-
-    const formData = new FormData();
-    formData.set("currentPassword", currentPassword);
-    formData.set("newPassword", newPassword);
-    formData.set("confirmPassword", confirmPassword);
-
-    const res = await changePassword(formData);
-
-    if (res.success) {
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-      setHasPassword(true);
-      setPassMessage({
-        text: res.message || t("Password updated successfully!", "បានប្តូរពាក្យសម្ងាត់ដោយជោគជ័យ!"),
-        isError: false,
-      });
-      toast.success(
-        res.message || t("Password updated successfully!", "បានប្តូរពាក្យសម្ងាត់ដោយជោគជ័យ!"),
-        t("Security Updated", "បានបច្ចុប្បន្នភាពសុវត្ថិភាព")
-      );
-    } else {
-      setPassMessage({
-        text: res.error || t("Failed to update password.", "បរាជ័យក្នុងការប្តូរពាក្យសម្ងាត់។"),
-        isError: true,
-      });
-      toast.error(
-        res.error || t("Failed to update password.", "បរាជ័យក្នុងការប្តូរពាក្យសម្ងាត់។"),
-        t("Password Error", "កំហុសពាក្យសម្ងាត់")
-      );
-    }
-    setIsChangingPass(false);
-  };
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setMessage(null);
