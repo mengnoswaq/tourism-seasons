@@ -265,20 +265,22 @@ export default function ProfilePage() {
                 <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
                   Password
                 </label>
-                <Link href="/profile/change-password" className="relative flex items-center block group">
+                <div className="relative flex items-center">
                   <Input
                     type="password"
                     value="••••••••••••"
                     readOnly
-                    className="bg-slate-50 font-mono text-slate-400 py-2.5 px-4 pr-10 cursor-pointer group-hover:bg-slate-100/80 transition-colors"
+                    disabled
+                    className="bg-slate-50 font-mono text-slate-500 py-2.5 px-4 pr-10 cursor-not-allowed select-none"
                   />
-                  <div
-                    className="absolute right-3 top-2.5 text-slate-400 group-hover:text-[#2791F5] p-1 rounded-md transition-colors"
+                  <Link
+                    href="/profile/change-password"
+                    className="absolute right-3 top-2.5 text-slate-400 hover:text-[#2791F5] p-1 rounded-md transition-colors cursor-pointer"
                     title="Change Password"
                   >
                     <Edit3 className="w-4 h-4" />
-                  </div>
-                </Link>
+                  </Link>
+                </div>
               </div>
 
               <div className="space-y-1.5">

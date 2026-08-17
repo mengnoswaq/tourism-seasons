@@ -268,20 +268,22 @@ export default function AdminProfilePage() {
               <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
                 {t("Password", "ពាក្យសម្ងាត់")}
               </label>
-              <Link href="/admin/profile/change-password" className="relative flex items-center block group">
+              <div className="relative flex items-center">
                 <Input
                   type="password"
                   value="••••••••••••"
                   readOnly
-                  className="bg-slate-50 font-mono text-slate-400 py-2.5 px-4 pr-10 cursor-pointer group-hover:bg-slate-100/80 transition-colors"
+                  disabled
+                  className="bg-slate-50 font-mono text-slate-500 py-2.5 px-4 pr-10 cursor-not-allowed select-none"
                 />
-                <div
-                  className="absolute right-3 top-2.5 text-slate-400 group-hover:text-[#2791F5] p-1 rounded-md transition-colors"
+                <Link
+                  href="/admin/profile/change-password"
+                  className="absolute right-3.5 top-3 text-slate-400 hover:text-[#2791F5] p-1 rounded-md transition-colors cursor-pointer"
                   title={t("Change Password", "ប្តូរពាក្យសម្ងាត់")}
                 >
                   <Edit3 className="w-4 h-4" />
-                </div>
-              </Link>
+                </Link>
+              </div>
             </div>
 
             <div className="space-y-2">
