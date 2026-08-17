@@ -23,6 +23,8 @@ export default function AdminProfilePage() {
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<{ text: string; isError: boolean } | null>(null);
@@ -31,6 +33,7 @@ export default function AdminProfilePage() {
     if (session?.user) {
       setName(session.user.name || "");
       setImageUrl(session.user.image || "");
+      setPreviewUrl(session.user.image || "");
     }
 
     // Fetch latest user profile details
@@ -41,6 +44,7 @@ export default function AdminProfilePage() {
           setName(data.user.name || "");
           setBio(data.user.bio || "");
           setImageUrl(data.user.image || "");
+          setPreviewUrl(data.user.image || "");
         }
       })
       .catch(() => {});
@@ -61,34 +65,19 @@ export default function AdminProfilePage() {
 
   const userRole = (session?.user as any)?.role || "USER";
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setIsUploading(true);
-    try {
-      const url = await uploadImage(file);
-      setImageUrl(url);
-      toast.success(
-        t("Profile picture uploaded successfully!", "បានផ្ទុកឡើងរូបថតប្រវត្តិរូបដោយជោគជ័យ!"),
-        t("Avatar Changed", "បានប្តូររូបថត")
-      );
-    } catch (err) {
-      toast.error(
-        t("Failed to process profile picture.", "បរាជ័យក្នុងការដំណើរការរូបថតប្រវត្តិរូប។"),
-        t("Upload Error", "កំហុសនៃការផ្ទុកឡើង")
-      );
-    } finally {
-      setIsUploading(false);
-    }
+    setSelectedFile(file);
+    const localPreview = URL.createObjectURL(file);
+    setPreviewUrl(localPreview);
   };
 
   const handleRemoveImage = () => {
+    setSelectedFile(null);
+    setPreviewUrl("");
     setImageUrl("");
-    toast.info(
-      t("Profile picture removed.", "បានលុបរូបថតប្រវត្តិរូប។"),
-      t("Avatar Removed", "បានលុបរូបថត")
-    );
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -96,21 +85,42 @@ export default function AdminProfilePage() {
     setMessage(null);
     setIsSubmitting(true);
 
+    let finalImageUrl = imageUrl;
+
+    // Upload file to cloud/storage if user selected a new image file
+    if (selectedFile) {
+      setIsUploading(true);
+      try {
+        finalImageUrl = await uploadImage(selectedFile);
+        setImageUrl(finalImageUrl);
+      } catch (err) {
+        toast.error(
+          t("Failed to process profile picture.", "បរាជ័យក្នុងការដំណើរការរូបថតប្រវត្តិរូប។"),
+          t("Upload Error", "កំហុសនៃការផ្ទុកឡើង")
+        );
+        setIsSubmitting(false);
+        setIsUploading(false);
+        return;
+      }
+      setIsUploading(false);
+    }
+
     const formData = new FormData();
     formData.set("name", name);
     formData.set("bio", bio);
-    formData.set("image", imageUrl);
-    formData.set("removeImage", imageUrl ? "false" : "true");
+    formData.set("image", previewUrl ? finalImageUrl : "");
+    formData.set("removeImage", previewUrl ? "false" : "true");
 
     const res = await updateProfile(formData);
 
     if (res.success) {
+      setSelectedFile(null);
       setMessage({
-        text: t("Profile updated successfully!", "បានបច្ចុប្បន្នភាពប្រវត្តិរូបដោយជោគជ័យ!"),
+        text: t("Profile details and image saved successfully!", "បានរក្សាទុកព័ត៌មានប្រវត្តិរូប និងរូបថតដោយជោគជ័យ!"),
         isError: false,
       });
       toast.success(
-        t("Admin profile details saved!", "បានរក្សាទុកព័ត៌មានប្រវត្តិរូបអ្នកគ្រប់គ្រង!"),
+        t("Profile details and image saved successfully!", "បានរក្សាទុកព័ត៌មានប្រវត្តិរូប និងរូបថតដោយជោគជ័យ!"),
         t("Profile Saved", "បានរក្សាទុក")
       );
       await updateSession();
@@ -162,7 +172,7 @@ export default function AdminProfilePage() {
         <Card className="bg-white border border-slate-200 shadow-sm p-6 text-center space-y-4 h-fit rounded-2xl">
           <div className="relative inline-block mx-auto">
             <Avatar
-              src={imageUrl}
+              src={previewUrl || imageUrl}
               fallback={name || "A"}
               className={`w-32 h-32 mx-auto border-4 border-slate-100 shadow-md ring-2 ring-[#2791F5]/20 ${
                 isUploading ? "opacity-50 animate-pulse" : ""
@@ -170,7 +180,7 @@ export default function AdminProfilePage() {
             />
             <label className="absolute bottom-1 right-1 p-2.5 bg-[#2791F5] hover:bg-blue-600 text-white rounded-full cursor-pointer shadow-lg transition-transform hover:scale-110">
               <Upload className={`w-4 h-4 ${isUploading ? "animate-spin" : ""}`} />
-              <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={isUploading} />
+              <input type="file" accept="image/*" className="hidden" onChange={handleImageSelect} disabled={isUploading} />
             </label>
           </div>
 
@@ -180,11 +190,13 @@ export default function AdminProfilePage() {
             <p className="text-[11px] text-[#2791F5] font-medium mt-1">
               {isUploading
                 ? t("Uploading image...", "កំពុងផ្ទុកឡើងរូបថត...")
+                : selectedFile
+                ? t("Preview ready (click Save below)", "បានមើលជាមុន (ចុច រក្សាទុក ខាងក្រោម)")
                 : t("Click blue icon to change photo", "ចុចរូបសញ្ញាខៀវដើម្បីប្តូររូបថត")}
             </p>
           </div>
 
-          {imageUrl && (
+          {(previewUrl || imageUrl) && (
             <div className="pt-2 border-t border-slate-100">
               <Button
                 variant="ghost"

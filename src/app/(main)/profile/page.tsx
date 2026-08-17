@@ -27,6 +27,8 @@ export default function ProfilePage() {
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<{ text: string; isError: boolean } | null>(null);
@@ -35,6 +37,7 @@ export default function ProfilePage() {
     if (session?.user) {
       setName(session.user.name || "");
       setImageUrl(session.user.image || "");
+      setPreviewUrl(session.user.image || "");
     }
 
     // Fetch Navbar Categories & NavItems
@@ -56,6 +59,7 @@ export default function ProfilePage() {
           setName(data.user.name || "");
           setBio(data.user.bio || "");
           setImageUrl(data.user.image || "");
+          setPreviewUrl(data.user.image || "");
         }
       })
       .catch(() => {});
@@ -80,25 +84,19 @@ export default function ProfilePage() {
 
   const userRole = (session?.user as any)?.role || "USER";
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setIsUploading(true);
-    try {
-      const url = await uploadImage(file);
-      setImageUrl(url);
-      toast.success("Profile picture updated!", "Avatar Changed");
-    } catch (err) {
-      toast.error("Failed to process profile picture.", "Upload Error");
-    } finally {
-      setIsUploading(false);
-    }
+    setSelectedFile(file);
+    const localPreview = URL.createObjectURL(file);
+    setPreviewUrl(localPreview);
   };
 
   const handleRemoveImage = () => {
+    setSelectedFile(null);
+    setPreviewUrl("");
     setImageUrl("");
-    toast.info("Profile picture removed.", "Avatar Removed");
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -106,17 +104,34 @@ export default function ProfilePage() {
     setMessage(null);
     setIsSubmitting(true);
 
+    let finalImageUrl = imageUrl;
+
+    if (selectedFile) {
+      setIsUploading(true);
+      try {
+        finalImageUrl = await uploadImage(selectedFile);
+        setImageUrl(finalImageUrl);
+      } catch (err) {
+        toast.error("Failed to process profile picture.", "Upload Error");
+        setIsSubmitting(false);
+        setIsUploading(false);
+        return;
+      }
+      setIsUploading(false);
+    }
+
     const formData = new FormData();
     formData.set("name", name);
     formData.set("bio", bio);
-    formData.set("image", imageUrl);
-    formData.set("removeImage", imageUrl ? "false" : "true");
+    formData.set("image", previewUrl ? finalImageUrl : "");
+    formData.set("removeImage", previewUrl ? "false" : "true");
 
     const res = await updateProfile(formData);
 
     if (res.success) {
-      setMessage({ text: "Profile details updated successfully!", isError: false });
-      toast.success("Profile details updated successfully!", "Profile Saved");
+      setSelectedFile(null);
+      setMessage({ text: "Profile details and picture saved successfully!", isError: false });
+      toast.success("Profile details and picture saved successfully!", "Profile Saved");
       await updateSession();
       router.refresh();
     } else {
@@ -152,7 +167,7 @@ export default function ProfilePage() {
           <Card className="bg-white border-slate-200 shadow-sm p-6 text-center space-y-4 h-fit">
             <div className="relative inline-block mx-auto">
               <Avatar
-                src={imageUrl}
+                src={previewUrl || imageUrl}
                 fallback={name || "U"}
                 className={`w-28 h-28 mx-auto border-4 border-slate-100 shadow-md ${
                   isUploading ? "opacity-50 animate-pulse" : ""
@@ -160,7 +175,7 @@ export default function ProfilePage() {
               />
               <label className="absolute bottom-0 right-0 p-2 bg-[#2791F5] hover:bg-blue-600 text-white rounded-full cursor-pointer shadow-md transition-transform hover:scale-110">
                 <Upload className={`w-4 h-4 ${isUploading ? "animate-spin" : ""}`} />
-                <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={isUploading} />
+                <input type="file" accept="image/*" className="hidden" onChange={handleImageSelect} disabled={isUploading} />
               </label>
             </div>
 
@@ -168,7 +183,11 @@ export default function ProfilePage() {
               <h2 className="text-lg font-bold text-slate-900">{name || "Anonymous User"}</h2>
               <p className="text-xs text-slate-400 font-mono mt-0.5">{session?.user?.email}</p>
               <p className="text-[11px] text-[#2791F5] font-medium mt-1">
-                {isUploading ? "Uploading image..." : "Click blue icon to change photo"}
+                {isUploading
+                  ? "Uploading image..."
+                  : selectedFile
+                  ? "Preview ready (click Save below)"
+                  : "Click blue icon to change photo"}
               </p>
             </div>
 
@@ -178,7 +197,7 @@ export default function ProfilePage() {
               </Badge>
             </div>
 
-            {imageUrl && (
+            {(previewUrl || imageUrl) && (
               <div className="pt-2 border-t border-slate-100">
                 <Button
                   variant="ghost"
