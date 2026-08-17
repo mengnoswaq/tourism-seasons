@@ -182,13 +182,16 @@ export default function ProfilePage() {
             <div>
               <h2 className="text-lg font-bold text-slate-900">{name || "Anonymous User"}</h2>
               <p className="text-xs text-slate-400 font-mono mt-0.5">{session?.user?.email}</p>
-              <p className="text-[11px] text-[#2791F5] font-medium mt-1">
-                {isUploading
-                  ? "Uploading image..."
-                  : selectedFile
-                  ? "Preview ready (click Save below)"
-                  : "Click blue icon to change photo"}
-              </p>
+              {isUploading && (
+                <p className="text-[11px] text-[#2791F5] font-medium mt-1 animate-pulse">
+                  Uploading image...
+                </p>
+              )}
+              {!isUploading && selectedFile && (
+                <p className="text-[11px] text-emerald-600 font-medium mt-1">
+                  Preview ready (click Save below)
+                </p>
+              )}
             </div>
 
             <div className="pt-2 flex justify-center">

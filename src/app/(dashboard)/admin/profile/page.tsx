@@ -187,13 +187,16 @@ export default function AdminProfilePage() {
           <div>
             <h2 className="text-lg font-bold text-slate-900">{name || "Admin User"}</h2>
             <p className="text-xs text-slate-400 font-mono mt-0.5">{session?.user?.email}</p>
-            <p className="text-[11px] text-[#2791F5] font-medium mt-1">
-              {isUploading
-                ? t("Uploading image...", "កំពុងផ្ទុកឡើងរូបថត...")
-                : selectedFile
-                ? t("Preview ready (click Save below)", "បានមើលជាមុន (ចុច រក្សាទុក ខាងក្រោម)")
-                : t("Click blue icon to change photo", "ចុចរូបសញ្ញាខៀវដើម្បីប្តូររូបថត")}
-            </p>
+            {isUploading && (
+              <p className="text-[11px] text-[#2791F5] font-medium mt-1 animate-pulse">
+                {t("Uploading image...", "កំពុងផ្ទុកឡើងរូបថត...")}
+              </p>
+            )}
+            {!isUploading && selectedFile && (
+              <p className="text-[11px] text-emerald-600 font-medium mt-1">
+                {t("Preview ready (click Save below)", "បានមើលជាមុន (ចុច រក្សាទុក ខាងក្រោម)")}
+              </p>
+            )}
           </div>
 
           {(previewUrl || imageUrl) && (
