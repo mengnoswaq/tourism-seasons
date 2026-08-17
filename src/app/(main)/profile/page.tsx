@@ -313,6 +313,34 @@ export default function ProfilePage() {
                 </div>
               </div>
 
+              {/* Password Box directly below Email Address */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Password
+                </label>
+                <div className="relative flex items-center">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      document.getElementById("change-password-section")?.scrollIntoView({ behavior: "smooth" });
+                    }}
+                    className="absolute left-3 text-xs text-[#2791F5] hover:underline font-bold z-10 flex items-center gap-1 cursor-pointer"
+                  >
+                    Change
+                  </button>
+                  <Input
+                    type="password"
+                    value="••••••••••••"
+                    readOnly
+                    onClick={() => {
+                      document.getElementById("change-password-section")?.scrollIntoView({ behavior: "smooth" });
+                    }}
+                    className="bg-slate-50 font-mono text-slate-400 py-2.5 pl-20 pr-10 cursor-pointer hover:bg-slate-100/80 transition-colors"
+                  />
+                  <Lock className="w-4 h-4 text-slate-400 absolute right-3 top-3 pointer-events-none" />
+                </div>
+              </div>
+
 
 
               <div className="space-y-1.5">
@@ -338,7 +366,7 @@ export default function ProfilePage() {
           </Card>
 
           {/* Change Password Card */}
-          <Card className="md:col-span-3 bg-white border-slate-200 shadow-sm p-6 space-y-6">
+          <Card id="change-password-section" className="md:col-span-3 bg-white border-slate-200 shadow-sm p-6 space-y-6">
             <div className="border-b border-slate-100 pb-4">
               <div className="flex items-center gap-2 mb-1">
                 <Lock className="w-4 h-4 text-[#2791F5]" />
