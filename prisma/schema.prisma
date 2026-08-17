@@ -168,3 +168,15 @@ model SiteSetting {
   descriptionKhmer  String?
   updatedAt          DateTime @updatedAt
 }
+
+model VerificationCode {
+  id        String   @id @default(cuid())
+  email     String
+  code      String
+  type      String   @default("REGISTER") // REGISTER or FORGOT_PASSWORD
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([code])
+}

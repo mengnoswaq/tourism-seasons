@@ -3,62 +3,73 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { sendRegisterVerificationCode, registerUserWithVerification } from "@/actions/auth";
+import { sendForgotPasswordCode, resetPasswordWithCode } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { signIn } from "next-auth/react";
-import { UserPlus, Chrome, Eye, EyeOff, Mail, KeyRound, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { Mail, KeyRound, Lock, Eye, EyeOff, ArrowLeft, CheckCircle2 } from "lucide-react";
 
-export default function RegisterPage() {
+export default function ForgotPasswordPage() {
   const router = useRouter();
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Step 1: Account info, Step 2: Verification Code
   const [step, setStep] = useState<1 | 2>(1);
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleRequestCode = async (e: React.FormEvent) => {
+  const [showNewPass, setShowNewPass] = useState(false);
+  const [showConfirmPass, setShowConfirmPass] = useState(false);
+
+  const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccess("");
     setIsLoading(true);
 
-    const res = await sendRegisterVerificationCode(email);
+    const res = await sendForgotPasswordCode(email);
 
     if (!res.success) {
-      setError(res.error || "Failed to send verification code.");
+      setError(res.error || "Failed to send reset code.");
     } else {
-      setSuccess(res.message || "Verification code sent to your email!");
+      setSuccess(res.message || "Reset code sent to your email!");
       setStep(2);
     }
     setIsLoading(false);
   };
 
-  const handleVerifyAndRegister = async (e: React.FormEvent) => {
+  const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccess("");
+
+    if (newPassword.length < 6) {
+      setError("New password must be at least 6 characters long.");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError("New password and confirm password do not match.");
+      return;
+    }
+
     setIsLoading(true);
 
     const formData = new FormData();
-    formData.set("name", name);
     formData.set("email", email);
-    formData.set("password", password);
     formData.set("code", code);
+    formData.set("newPassword", newPassword);
+    formData.set("confirmPassword", confirmPassword);
 
-    const res = await registerUserWithVerification(formData);
+    const res = await resetPasswordWithCode(formData);
 
     if (!res.success) {
-      setError(res.error || "Verification failed.");
+      setError(res.error || "Failed to reset password.");
     } else {
-      setSuccess("Account verified and created successfully! Redirecting to login...");
+      setSuccess("Password reset successfully! Redirecting to login...");
       setTimeout(() => {
         router.push("/login");
       }, 1500);
@@ -78,12 +89,12 @@ export default function RegisterPage() {
             />
           </Link>
           <CardTitle className="text-2xl font-black">
-            {step === 1 ? "Create Account" : "Verify Your Email"}
+            {step === 1 ? "Forgot Password" : "Reset Password"}
           </CardTitle>
           <CardDescription>
             {step === 1
-              ? "Join Tourism Seasons to read, comment, and engage with top travel guides"
-              : `We sent a 6-digit code to ${email}. Please check your inbox.`}
+              ? "Enter your email address to receive a 6-digit password reset code"
+              : `Enter the code sent to ${email} and your new password`}
           </CardDescription>
         </CardHeader>
 
@@ -102,58 +113,22 @@ export default function RegisterPage() {
           )}
 
           {step === 1 ? (
-            /* STEP 1: Registration Form */
-            <form onSubmit={handleRequestCode} className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  Full Name
-                </label>
-                <Input
-                  name="name"
-                  type="text"
-                  placeholder="John Doe"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-              </div>
-
+            /* STEP 1: Enter Email */
+            <form onSubmit={handleSendCode} className="space-y-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                   Email Address
                 </label>
-                <Input
-                  name="email"
-                  type="email"
-                  placeholder="john@gmail.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  Password
-                </label>
                 <div className="relative">
                   <Input
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Min 6 characters..."
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    type="email"
+                    placeholder="john@gmail.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     required
                     className="pr-10"
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 transition-colors"
-                    title={showPassword ? "Hide Password" : "Show Password"}
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
+                  <Mail className="w-4 h-4 text-slate-400 absolute right-3.5 top-3" />
                 </div>
               </div>
 
@@ -164,15 +139,15 @@ export default function RegisterPage() {
                 disabled={isLoading}
               >
                 <Mail className="w-4 h-4" />{" "}
-                {isLoading ? "Sending Verification Code..." : "Send Verification Code"}
+                {isLoading ? "Sending Reset Code..." : "Send Password Reset Code"}
               </Button>
             </form>
           ) : (
-            /* STEP 2: Enter 6-digit OTP Code */
-            <form onSubmit={handleVerifyAndRegister} className="space-y-4">
+            /* STEP 2: Verification Code + New Password */
+            <form onSubmit={handleResetPassword} className="space-y-4">
               <div className="space-y-1.5 text-center">
                 <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
-                  6-Digit Verification Code
+                  6-Digit Reset Code
                 </label>
                 <Input
                   type="text"
@@ -183,9 +158,52 @@ export default function RegisterPage() {
                   required
                   className="text-center font-mono text-xl tracking-[0.5em] py-3 uppercase"
                 />
-                <p className="text-[11px] text-slate-400 mt-1">
-                  Enter the code sent to <strong className="text-slate-700">{email}</strong>
-                </p>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  New Password
+                </label>
+                <div className="relative">
+                  <Input
+                    type={showNewPass ? "text" : "password"}
+                    placeholder="Min 6 characters..."
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPass(!showNewPass)}
+                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 transition-colors"
+                  >
+                    {showNewPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Confirm New Password
+                </label>
+                <div className="relative">
+                  <Input
+                    type={showConfirmPass ? "text" : "password"}
+                    placeholder="Min 6 characters..."
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPass(!showConfirmPass)}
+                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 transition-colors"
+                  >
+                    {showConfirmPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
 
               <Button
@@ -194,8 +212,8 @@ export default function RegisterPage() {
                 type="submit"
                 disabled={isLoading || code.length !== 6}
               >
-                <UserPlus className="w-4 h-4" />{" "}
-                {isLoading ? "Verifying & Creating Account..." : "Verify & Complete Registration"}
+                <Lock className="w-4 h-4" />{" "}
+                {isLoading ? "Resetting Password..." : "Reset & Save Password"}
               </Button>
 
               <div className="flex items-center justify-between text-xs pt-2">
@@ -208,12 +226,12 @@ export default function RegisterPage() {
                   }}
                   className="text-slate-500 hover:text-slate-800 flex items-center gap-1 font-semibold"
                 >
-                  <ArrowLeft className="w-3.5 h-3.5" /> Back to details
+                  <ArrowLeft className="w-3.5 h-3.5" /> Back to email
                 </button>
 
                 <button
                   type="button"
-                  onClick={handleRequestCode}
+                  onClick={handleSendCode}
                   disabled={isLoading}
                   className="text-[#2791F5] hover:underline font-semibold"
                 >
@@ -222,32 +240,12 @@ export default function RegisterPage() {
               </div>
             </form>
           )}
-
-          {step === 1 && (
-            <>
-              <div className="relative my-4 flex items-center justify-center">
-                <div className="border-t border-slate-200 w-full" />
-                <span className="bg-white px-3 text-[10px] uppercase font-bold text-slate-400 absolute">
-                  Or sign up with
-                </span>
-              </div>
-
-              <Button
-                variant="outline"
-                className="w-full gap-2 py-2 text-xs font-semibold"
-                type="button"
-                onClick={() => signIn("google", { callbackUrl: "/" })}
-              >
-                <Chrome className="w-4 h-4 text-blue-500" /> Sign Up with Google (Gmail)
-              </Button>
-            </>
-          )}
         </CardContent>
 
         <CardFooter className="justify-center text-xs text-slate-500">
-          Already have an account?{" "}
+          Remember your password?{" "}
           <Link href="/login" className="font-bold text-[#2791F5] hover:underline ml-1">
-            Sign In
+            Back to Sign In
           </Link>
         </CardFooter>
       </Card>
