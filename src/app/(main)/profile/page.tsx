@@ -151,16 +151,25 @@ export default function ProfilePage() {
           {/* Left Side: Avatar Card */}
           <Card className="bg-white border-slate-200 shadow-sm p-6 text-center space-y-4 h-fit">
             <div className="relative inline-block mx-auto">
-              <Avatar src={imageUrl} fallback={name || "U"} className="w-28 h-28 mx-auto border-4 border-slate-100 shadow-md" />
+              <Avatar
+                src={imageUrl}
+                fallback={name || "U"}
+                className={`w-28 h-28 mx-auto border-4 border-slate-100 shadow-md ${
+                  isUploading ? "opacity-50 animate-pulse" : ""
+                }`}
+              />
               <label className="absolute bottom-0 right-0 p-2 bg-[#2791F5] hover:bg-blue-600 text-white rounded-full cursor-pointer shadow-md transition-transform hover:scale-110">
-                <Upload className="w-4 h-4" />
-                <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                <Upload className={`w-4 h-4 ${isUploading ? "animate-spin" : ""}`} />
+                <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={isUploading} />
               </label>
             </div>
 
             <div>
               <h2 className="text-lg font-bold text-slate-900">{name || "Anonymous User"}</h2>
               <p className="text-xs text-slate-400 font-mono mt-0.5">{session?.user?.email}</p>
+              <p className="text-[11px] text-[#2791F5] font-medium mt-1">
+                {isUploading ? "Uploading image..." : "Click blue icon to change photo"}
+              </p>
             </div>
 
             <div className="pt-2 flex justify-center">
@@ -228,35 +237,7 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center justify-between">
-                  <span>Profile Picture</span>
-                  {isUploading && <span className="text-xs text-[#2791F5] font-normal">Uploading image...</span>}
-                </label>
-                <div className="flex items-center gap-3">
-                  <Input
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                    placeholder="Upload image or paste image URL..."
-                  />
-                  <label className="shrink-0 cursor-pointer bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold text-slate-800 flex items-center gap-2 transition-colors">
-                    <Upload className="w-4 h-4 text-[#2791F5]" /> {isUploading ? "Uploading..." : "Upload File"}
-                    <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-                  </label>
 
-                  {imageUrl && (
-                    <Button
-                      variant="outline"
-                      type="button"
-                      onClick={handleRemoveImage}
-                      className="px-3 py-2 text-xs text-red-600 border-red-200 hover:bg-red-50"
-                      title="Remove Picture"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  )}
-                </div>
-              </div>
 
               <div className="space-y-1.5">
                 <label className="text-xs font-bold uppercase tracking-wider text-slate-700">

@@ -164,17 +164,24 @@ export default function AdminProfilePage() {
             <Avatar
               src={imageUrl}
               fallback={name || "A"}
-              className="w-32 h-32 mx-auto border-4 border-slate-100 shadow-md ring-2 ring-[#2791F5]/20"
+              className={`w-32 h-32 mx-auto border-4 border-slate-100 shadow-md ring-2 ring-[#2791F5]/20 ${
+                isUploading ? "opacity-50 animate-pulse" : ""
+              }`}
             />
             <label className="absolute bottom-1 right-1 p-2.5 bg-[#2791F5] hover:bg-blue-600 text-white rounded-full cursor-pointer shadow-lg transition-transform hover:scale-110">
-              <Upload className="w-4 h-4" />
-              <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+              <Upload className={`w-4 h-4 ${isUploading ? "animate-spin" : ""}`} />
+              <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={isUploading} />
             </label>
           </div>
 
           <div>
             <h2 className="text-lg font-bold text-slate-900">{name || "Admin User"}</h2>
-            <p className="text-xs text-slate-400 font-mono mt-1">{session?.user?.email}</p>
+            <p className="text-xs text-slate-400 font-mono mt-0.5">{session?.user?.email}</p>
+            <p className="text-[11px] text-[#2791F5] font-medium mt-1">
+              {isUploading
+                ? t("Uploading image...", "កំពុងផ្ទុកឡើងរូបថត...")
+                : t("Click blue icon to change photo", "ចុចរូបសញ្ញាខៀវដើម្បីប្តូររូបថត")}
+            </p>
           </div>
 
           {imageUrl && (
@@ -241,41 +248,7 @@ export default function AdminProfilePage() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center justify-between">
-                <span>{t("Profile Picture URL", "URL រូបថតប្រវត្តិរូប")}</span>
-                {isUploading && (
-                  <span className="text-xs text-[#2791F5] font-normal animate-pulse">
-                    {t("Uploading image...", "កំពុងផ្ទុកឡើងរូបថត...")}
-                  </span>
-                )}
-              </label>
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                <Input
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  placeholder={t("Upload image or paste image URL...", "ផ្ទុកឡើងរូបថត ឬ បញ្ចូល URL រូបថត...")}
-                  className="py-2.5 flex-1"
-                />
-                <label className="shrink-0 cursor-pointer bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold text-slate-800 flex items-center justify-center gap-2 transition-colors">
-                  <Upload className="w-4 h-4 text-[#2791F5]" />
-                  {isUploading ? t("Uploading...", "កំពុងផ្ទុកឡើង...") : t("Upload File", "ជ្រើសរើសរូបថត")}
-                  <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-                </label>
 
-                {imageUrl && (
-                  <Button
-                    variant="outline"
-                    type="button"
-                    onClick={handleRemoveImage}
-                    className="px-3 py-2.5 text-xs text-red-600 border-red-200 hover:bg-red-50"
-                    title={t("Remove Picture", "លុបរូបថត")}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                )}
-              </div>
-            </div>
 
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
