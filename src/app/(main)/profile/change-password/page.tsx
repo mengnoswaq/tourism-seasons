@@ -250,7 +250,7 @@ export default function MainChangePasswordPage() {
               </div>
             </div>
 
-            <div className="pt-2">
+            <div className="pt-2 flex justify-end">
               <Button
                 variant="outline"
                 type="submit"
