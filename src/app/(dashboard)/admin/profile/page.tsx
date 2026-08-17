@@ -489,6 +489,7 @@ export default function AdminProfilePage() {
               </div>
             </div>
 
+            <div className="pt-2">
               <Button
                 variant="outline"
                 type="submit"

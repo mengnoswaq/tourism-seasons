@@ -466,6 +466,7 @@ export default function ProfilePage() {
                     ? "Saving Password..."
                     : hasPassword
                     ? "Update Password"
+                    : "Create Account Password"}
                 </Button>
               </div>
             </form>
