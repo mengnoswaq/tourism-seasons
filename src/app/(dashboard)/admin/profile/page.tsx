@@ -199,6 +199,12 @@ export default function AdminProfilePage() {
             )}
           </div>
 
+          {bio && (
+            <p className="text-xs text-slate-600 italic border-t border-slate-100 pt-3">
+              &quot;{bio}&quot;
+            </p>
+          )}
+
           {(previewUrl || imageUrl) && (
             <div className="pt-2 border-t border-slate-100">
               <Button
@@ -211,12 +217,6 @@ export default function AdminProfilePage() {
                 <Trash2 className="w-3.5 h-3.5" /> {t("Remove Profile Picture", "លុបរូបថតប្រវត្តិរូប")}
               </Button>
             </div>
-          )}
-
-          {bio && (
-            <p className="text-xs text-slate-600 italic border-t border-slate-100 pt-3">
-              &quot;{bio}&quot;
-            </p>
           )}
         </Card>
 
