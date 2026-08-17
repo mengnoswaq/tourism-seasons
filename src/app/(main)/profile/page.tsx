@@ -117,8 +117,7 @@ export default function ProfilePage() {
     if (res.success) {
       setMessage({ text: "Profile details updated successfully!", isError: false });
       toast.success("Profile details updated successfully!", "Profile Saved");
-      const safeImageForSession = imageUrl && !imageUrl.startsWith("data:") && imageUrl.length <= 500 ? imageUrl : null;
-      await updateSession({ name, image: safeImageForSession });
+      await updateSession();
       router.refresh();
     } else {
       setMessage({ text: res.error || "Failed to update profile.", isError: true });

@@ -66,7 +66,12 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
+    maxAge: 24 * 60 * 60, // 24 hours (86400 seconds)
   },
+  jwt: {
+    maxAge: 24 * 60 * 60, // 24 hours (86400 seconds)
+  },
+  useSecureCookies: process.env.NODE_ENV === "production",
   pages: {
     signIn: "/login",
   },
@@ -119,30 +124,56 @@ export const authOptions: NextAuthOptions = {
       }
       return true;
     },
-    async jwt({ token, user, trigger, session }) {
-      if (user) {
-        token.id = user.id;
-        token.role = (user as any).role || "USER";
-      }
-      if (trigger === "update" && session) {
-        if (session.name) token.name = session.name;
-      }
-
+    async jwt({ token, user }) {
       // CRITICAL FIX FOR 494 REQUEST_HEADER_TOO_LARGE:
-      // Always strip picture/image from JWT token so cookie is under 200 bytes
-      delete token.picture;
-      delete token.image;
+      // Store ONLY essential identifiers in the JWT cookie payload to ensure cookie stays < 300 bytes (< 2KB limit).
+      // Strips name, email, image/picture, bio, and extraneous fields from cookie storage.
+      const userId = (user?.id as string) || (token.id as string) || (token.sub as string);
+      const userRole = ((user as any)?.role as string) || (token.role as string) || "USER";
 
-      return token;
+      return {
+        sub: userId,
+        id: userId,
+        role: userRole,
+      };
     },
     async session({ session, token }) {
-      if (session.user) {
-        (session.user as any).id = token.id;
-        (session.user as any).role = token.role;
+      // Dynamic Database Lookup:
+      // Keep cookie minimal and retrieve full profile details from DB when session is accessed.
+      if (session && token?.id) {
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+              image: true,
+              status: true,
+            },
+          });
 
-        // Ensure session.user.image is not an oversized Base64 string
-        if (typeof session.user.image === "string" && (session.user.image.startsWith("data:") || session.user.image.length > 500)) {
-          session.user.image = null;
+          if (!dbUser || dbUser.status === "INACTIVE") {
+            // Reject session if user was deleted or deactivated
+            return null as any;
+          }
+
+          // Sanitize avatar image to ensure no raw Base64 string is attached
+          const sanitizedImage =
+            dbUser.image && (dbUser.image.startsWith("data:") || dbUser.image.length > 500)
+              ? null
+              : dbUser.image;
+
+          session.user = {
+            id: dbUser.id,
+            name: dbUser.name,
+            email: dbUser.email,
+            image: sanitizedImage,
+            role: dbUser.role,
+          } as any;
+        } catch (error) {
+          console.error("Error fetching user session from database:", error);
         }
       }
       return session;

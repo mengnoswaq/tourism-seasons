@@ -7,6 +7,8 @@ import { QueryProvider } from "@/components/providers/query-provider";
 import { ToastProvider } from "@/components/ui/toast";
 import { LanguageProvider } from "@/context/language-context";
 import { GoogleAnalyticsTracker } from "@/components/analytics/google-analytics";
+import { AutoCookieCleaner } from "@/components/providers/auto-cookie-cleaner";
+import { InactivityLogout } from "@/components/providers/inactivity-logout";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const gaId = process.env.NEXT_PUBLIC_GA_ID || "G-2Z9KP07NG6";
@@ -53,11 +55,13 @@ export default function RootLayout({
           `}
         </Script>
       </head>
-      <body className={`${inter.variable} font-sans min-h-screen flex flex-col bg-white text-slate-900`}>
+      <body className={`${inter.variable} font-sans min-h-screen flex flex-col bg-[#FAF9F5] text-slate-900`}>
         <LanguageProvider>
           <SessionProvider>
             <QueryProvider>
               <ToastProvider>
+                <AutoCookieCleaner />
+                <InactivityLogout />
                 <GoogleAnalyticsTracker />
                 {children}
               </ToastProvider>

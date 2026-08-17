@@ -11,7 +11,8 @@ export async function middleware(req: NextRequest) {
   cookies.getAll().forEach((c) => {
     if (
       c.name.match(/^(__Secure-)?next-auth\.session-token\.\d+$/) ||
-      c.name.match(/^(__Host-)?next-auth\.session-token\.\d+$/)
+      c.name.match(/^(__Host-)?next-auth\.session-token\.\d+$/) ||
+      c.name.match(/^next-auth\.session-token\.\d+$/)
     ) {
       chunkedCookieKeys.push(c.name);
     }
