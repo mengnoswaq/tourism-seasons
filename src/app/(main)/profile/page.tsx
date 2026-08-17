@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
-import { User, Upload, ShieldCheck, Mail, Trash2, Lock, CheckCircle2 } from "lucide-react";
+import { User, Upload, ShieldCheck, Mail, Trash2, Lock, CheckCircle2, Edit3 } from "lucide-react";
 
 import { useToast } from "@/components/ui/toast";
 
@@ -266,16 +266,18 @@ export default function ProfilePage() {
                   Password
                 </label>
                 <Link href="/profile/change-password" className="relative flex items-center block group">
-                  <span className="absolute left-3 text-xs text-[#2791F5] group-hover:underline font-bold z-10 flex items-center gap-1 cursor-pointer">
-                    Change
-                  </span>
                   <Input
                     type="password"
                     value="••••••••••••"
                     readOnly
-                    className="bg-slate-50 font-mono text-slate-400 py-2.5 pl-20 pr-10 cursor-pointer group-hover:bg-slate-100/80 transition-colors"
+                    className="bg-slate-50 font-mono text-slate-400 py-2.5 px-4 pr-10 cursor-pointer group-hover:bg-slate-100/80 transition-colors"
                   />
-                  <Lock className="w-4 h-4 text-slate-400 absolute right-3 top-3 pointer-events-none" />
+                  <div
+                    className="absolute right-3 top-2.5 text-slate-400 group-hover:text-[#2791F5] p-1 rounded-md transition-colors"
+                    title="Change Password"
+                  >
+                    <Edit3 className="w-4 h-4" />
+                  </div>
                 </Link>
               </div>
 

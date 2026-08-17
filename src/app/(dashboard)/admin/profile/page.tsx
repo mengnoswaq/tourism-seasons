@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
-import { User, Upload, ShieldCheck, Mail, Trash2, CheckCircle2, UserCircle, Lock } from "lucide-react";
+import { User, Upload, ShieldCheck, Mail, Trash2, CheckCircle2, UserCircle, Lock, Edit3 } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
 import { useLanguage } from "@/context/language-context";
 
@@ -269,16 +269,18 @@ export default function AdminProfilePage() {
                 {t("Password", "ពាក្យសម្ងាត់")}
               </label>
               <Link href="/admin/profile/change-password" className="relative flex items-center block group">
-                <span className="absolute left-3.5 text-xs text-[#2791F5] group-hover:underline font-bold z-10 flex items-center gap-1 cursor-pointer">
-                  {t("Change", "ប្តូរ")}
-                </span>
                 <Input
                   type="password"
                   value="••••••••••••"
                   readOnly
-                  className="bg-slate-50 font-mono text-slate-400 py-2.5 pl-20 pr-10 cursor-pointer group-hover:bg-slate-100/80 transition-colors"
+                  className="bg-slate-50 font-mono text-slate-400 py-2.5 px-4 pr-10 cursor-pointer group-hover:bg-slate-100/80 transition-colors"
                 />
-                <Lock className="w-4 h-4 text-slate-400 absolute right-3.5 top-3.5 pointer-events-none" />
+                <div
+                  className="absolute right-3 top-2.5 text-slate-400 group-hover:text-[#2791F5] p-1 rounded-md transition-colors"
+                  title={t("Change Password", "ប្តូរពាក្យសម្ងាត់")}
+                >
+                  <Edit3 className="w-4 h-4" />
+                </div>
               </Link>
             </div>
 
