@@ -131,17 +131,9 @@ export default function LoginPage() {
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-              <div className="flex items-center justify-start pt-0.5">
-                <Link
-                  href="/forgot-password"
-                  className="text-xs text-[#2791F5] hover:underline font-semibold"
-                >
-                  Change
-                </Link>
-              </div>
             </div>
 
-            {/* Remember Me Checkbox */}
+            {/* Remember Me Checkbox & Forget Password Link */}
             <div className="flex items-center justify-between pt-1">
               <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-600 dark:text-slate-400 select-none">
                 <input
@@ -152,6 +144,13 @@ export default function LoginPage() {
                 />
                 <span>Remember me</span>
               </label>
+
+              <Link
+                href="/forgot-password"
+                className="text-xs text-[#2791F5] hover:underline font-semibold"
+              >
+                Forget password?
+              </Link>
             </div>
 
             <Button variant="primary" className="w-full gap-2 py-2.5 font-bold" type="submit" disabled={isLoading}>
