@@ -110,17 +110,9 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                  Password
-                </label>
-                <Link
-                  href="/forgot-password"
-                  className="text-xs text-[#2791F5] hover:underline font-semibold"
-                >
-                  Forgot password?
-                </Link>
-              </div>
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                Password
+              </label>
               <div className="relative">
                 <Input
                   type={showPassword ? "text" : "password"}
@@ -141,7 +133,7 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Remember Me Checkbox */}
+            {/* Remember Me Checkbox & Forgot Password Link */}
             <div className="flex items-center justify-between pt-1">
               <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-600 dark:text-slate-400 select-none">
                 <input
@@ -152,6 +144,13 @@ export default function LoginPage() {
                 />
                 <span>Remember me</span>
               </label>
+
+              <Link
+                href="/forgot-password"
+                className="text-xs text-[#2791F5] hover:underline font-semibold"
+              >
+                Forgot password?
+              </Link>
             </div>
 
             <Button variant="primary" className="w-full gap-2 py-2.5 font-bold" type="submit" disabled={isLoading}>
