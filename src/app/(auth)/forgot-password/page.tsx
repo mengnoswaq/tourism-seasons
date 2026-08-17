@@ -89,7 +89,7 @@ export default function ForgotPasswordPage() {
             />
           </Link>
           <CardTitle className="text-2xl font-black">
-            {step === 1 ? "Forgot Password" : "Reset Password"}
+            {step === 1 ? "Forget Password" : "Reset Password"}
           </CardTitle>
           <CardDescription>
             {step === 1
