@@ -18,6 +18,7 @@ import {
   X,
   Settings,
   Tag,
+  UserCircle,
 } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
@@ -47,6 +48,7 @@ export function AdminSidebar() {
     { label: t("Categories", "ប្រភេទព័ត៌មាន"), href: "/admin/categories", icon: Folder, roles: ["SUPERADMIN", "ADMIN"] },
     { label: t("User Roles", "តួនាទីអ្នកប្រើប្រាស់"), href: "/admin/users", icon: Users, roles: ["SUPERADMIN", "ADMIN"] },
     { label: t("Site Settings", "ការកំណត់គេហទំព័រ"), href: "/admin/settings", icon: Settings, roles: ["SUPERADMIN", "ADMIN"] },
+    { label: t("Edit My Profile", "កែប្រែប្រវត្តិរូបខ្ញុំ"), href: "/admin/profile", icon: UserCircle },
   ];
 
   const filteredNavItems = navItems.filter(
@@ -162,21 +164,25 @@ export function AdminSidebar() {
               </Link>
 
               {session?.user && (
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                  <div className="flex items-center gap-2.5 overflow-hidden">
+                <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100 group">
+                  <Link
+                    href="/admin/profile"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-2.5 overflow-hidden flex-1 cursor-pointer"
+                  >
                     <Avatar src={session.user.image} fallback={session.user.name || "U"} size="sm" />
                     <div className="flex flex-col truncate">
-                      <span className="text-xs font-bold text-slate-900 truncate">{session.user.name}</span>
+                      <span className="text-xs font-bold text-slate-900 truncate group-hover:text-[#2791F5] transition-colors">{session.user.name}</span>
                       <span className="text-[10px] text-[#2791F5] font-semibold">{userRole}</span>
                     </div>
-                  </div>
+                  </Link>
 
                   <button
                     onClick={() => {
                       setMobileOpen(false);
                       signOut();
                     }}
-                    className="p-1.5 text-slate-400 hover:text-red-500 rounded-lg hover:bg-slate-200 transition-colors"
+                    className="p-1.5 text-slate-400 hover:text-red-500 rounded-lg hover:bg-slate-200 transition-colors shrink-0"
                     title={t("Sign Out", "ចាកចេញ")}
                   >
                     <LogOut className="w-4 h-4" />
@@ -268,21 +274,21 @@ export function AdminSidebar() {
           </Link>
 
           {session?.user && (
-            <div className={cn("flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-100", collapsed && "justify-center")}>
-              <div className="flex items-center gap-2.5 overflow-hidden">
-                <Avatar src={session.user.image} fallback={session.user.name || "U"} size="sm" />
+            <div className={cn("flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-100 group hover:bg-slate-100/80 transition-colors", collapsed && "justify-center")}>
+              <Link href="/admin/profile" className="flex items-center gap-2.5 overflow-hidden flex-1 cursor-pointer" title={t("Edit Profile", "កែប្រែប្រវត្តិរូប")}>
+                <Avatar src={session.user.image} fallback={session.user.name || "U"} size="sm" className="group-hover:ring-2 group-hover:ring-[#2791F5]/40 transition-all" />
                 {!collapsed && (
                   <div className="flex flex-col truncate">
-                    <span className="text-xs font-bold text-slate-900 truncate">{session.user.name}</span>
+                    <span className="text-xs font-bold text-slate-900 truncate group-hover:text-[#2791F5] transition-colors">{session.user.name}</span>
                     <span className="text-[10px] text-[#2791F5] font-semibold">{userRole}</span>
                   </div>
                 )}
-              </div>
+              </Link>
 
               {!collapsed && (
                 <button
                   onClick={() => signOut()}
-                  className="p-1.5 text-slate-400 hover:text-red-500 rounded-lg hover:bg-slate-200 transition-colors"
+                  className="p-1.5 text-slate-400 hover:text-red-500 rounded-lg hover:bg-slate-200 transition-colors shrink-0"
                   title={t("Sign Out", "ចាកចេញ")}
                 >
                   <LogOut className="w-3.5 h-3.5" />
