@@ -69,14 +69,9 @@ export function ArticleDetailView({
           <div className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-b border-slate-200/80 dark:border-slate-800 py-4 text-xs text-slate-500">
             <div className="flex items-center gap-3">
               <Avatar src={article.author.image} fallback={article.author.name || "A"} size="md" />
-              <div>
-                <span className="font-bold text-slate-900 dark:text-white text-sm block">
-                  {article.author.name}
-                </span>
-                <span className="text-slate-400 text-xs">
-                  {(isKhmer && article.author.bioKhmer) ? article.author.bioKhmer : (article.author.bio || t("Staff Writer", "អ្នកនិពន្ធ"))}
-                </span>
-              </div>
+              <span className="font-bold text-slate-900 dark:text-white text-sm">
+                {article.author.name}
+              </span>
             </div>
 
             <div className="flex items-center gap-5 text-slate-400 text-xs font-medium">
