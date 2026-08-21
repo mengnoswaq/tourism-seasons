@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/utils";
 import { ApiResponse } from "@/types";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { authOptions, hasPermission } from "@/lib/auth";
 
 export async function getProvinces() {
   try {
@@ -24,6 +24,12 @@ export async function getProvinces() {
 }
 
 export async function getAllProvincesAdmin() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) return [];
+
+  const userRole = (session.user as any).role as string;
+  if (!hasPermission(userRole, ["SUPERADMIN", "ADMIN"])) return [];
+
   try {
     return await prisma.province.findMany({
       orderBy: { name: "asc" },
@@ -69,6 +75,11 @@ export async function createProvince(data: ProvinceInput): Promise<ApiResponse> 
   const session = await getServerSession(authOptions);
   if (!session?.user) return { success: false, error: "Unauthorized." };
 
+  const userRole = (session.user as any).role as string;
+  if (!hasPermission(userRole, ["SUPERADMIN", "ADMIN"])) {
+    return { success: false, error: "Permission denied. Only Super Admin or Admin can create provinces." };
+  }
+
   try {
     const slug = slugify(data.name);
     const existing = await prisma.province.findFirst({
@@ -100,6 +111,11 @@ export async function updateProvince(id: string, data: ProvinceInput): Promise<A
   const session = await getServerSession(authOptions);
   if (!session?.user) return { success: false, error: "Unauthorized." };
 
+  const userRole = (session.user as any).role as string;
+  if (!hasPermission(userRole, ["SUPERADMIN", "ADMIN"])) {
+    return { success: false, error: "Permission denied. Only Super Admin or Admin can update provinces." };
+  }
+
   try {
     const slug = slugify(data.name);
     const province = await prisma.province.update({
@@ -126,6 +142,11 @@ export async function toggleProvinceStatus(id: string): Promise<ApiResponse> {
   const session = await getServerSession(authOptions);
   if (!session?.user) return { success: false, error: "Unauthorized." };
 
+  const userRole = (session.user as any).role as string;
+  if (!hasPermission(userRole, ["SUPERADMIN", "ADMIN"])) {
+    return { success: false, error: "Permission denied. Only Super Admin or Admin can modify province status." };
+  }
+
   try {
     const existing = await prisma.province.findUnique({ where: { id } });
     if (!existing) return { success: false, error: "Province not found." };
@@ -144,6 +165,11 @@ export async function toggleProvinceStatus(id: string): Promise<ApiResponse> {
 export async function deleteProvince(id: string): Promise<ApiResponse> {
   const session = await getServerSession(authOptions);
   if (!session?.user) return { success: false, error: "Unauthorized." };
+
+  const userRole = (session.user as any).role as string;
+  if (!hasPermission(userRole, ["SUPERADMIN", "ADMIN"])) {
+    return { success: false, error: "Permission denied. Only Super Admin or Admin can delete provinces." };
+  }
 
   try {
     await prisma.province.delete({ where: { id } });

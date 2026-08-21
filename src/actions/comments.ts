@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { ApiResponse } from "@/types";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { authOptions, hasPermission } from "@/lib/auth";
 
 export async function getArticleComments(articleId: string) {
   try {
@@ -74,6 +74,12 @@ export async function createComment(
 export const addComment = createComment;
 
 export async function getAllCommentsAdmin() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) return [];
+
+  const userRole = (session.user as any).role as string;
+  if (!hasPermission(userRole, ["SUPERADMIN", "ADMIN"])) return [];
+
   try {
     return await prisma.comment.findMany({
       orderBy: { createdAt: "desc" },
@@ -96,6 +102,11 @@ export async function toggleCommentStatusAdmin(id: string): Promise<ApiResponse>
   const session = await getServerSession(authOptions);
   if (!session?.user) return { success: false, error: "Unauthorized." };
 
+  const userRole = (session.user as any).role as string;
+  if (!hasPermission(userRole, ["SUPERADMIN", "ADMIN"])) {
+    return { success: false, error: "Permission denied." };
+  }
+
   try {
     const existing = await prisma.comment.findUnique({ where: { id } });
     if (!existing) return { success: false, error: "Comment not found." };
@@ -115,6 +126,11 @@ export async function deleteCommentAdmin(id: string): Promise<ApiResponse> {
   const session = await getServerSession(authOptions);
   if (!session?.user) return { success: false, error: "Unauthorized." };
 
+  const userRole = (session.user as any).role as string;
+  if (!hasPermission(userRole, ["SUPERADMIN", "ADMIN"])) {
+    return { success: false, error: "Permission denied." };
+  }
+
   try {
     await prisma.comment.delete({ where: { id } });
     return { success: true };
@@ -122,3 +138,4 @@ export async function deleteCommentAdmin(id: string): Promise<ApiResponse> {
     return { success: false, error: error.message || "Failed to delete comment." };
   }
 }
+

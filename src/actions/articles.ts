@@ -108,6 +108,11 @@ export async function toggleArticlePublishedStatus(id: string): Promise<ApiRespo
     return { success: false, error: "Unauthorized." };
   }
 
+  const userRole = (session.user as any).role as string;
+  if (!hasPermission(userRole, ["SUPERADMIN", "ADMIN", "EDITOR", "AUTHOR"])) {
+    return { success: false, error: "Permission denied." };
+  }
+
   const existing = await prisma.article.findUnique({ where: { id } });
   if (!existing) {
     return { success: false, error: "Article not found." };
@@ -134,6 +139,11 @@ export async function toggleArticleFeaturedStatus(id: string): Promise<ApiRespon
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     return { success: false, error: "Unauthorized." };
+  }
+
+  const userRole = (session.user as any).role as string;
+  if (!hasPermission(userRole, ["SUPERADMIN", "ADMIN", "EDITOR", "AUTHOR"])) {
+    return { success: false, error: "Permission denied." };
   }
 
   const existing = await prisma.article.findUnique({ where: { id } });
@@ -281,6 +291,10 @@ export async function updateArticle(id: string, formData: FormData): Promise<Api
     return { success: false, error: "Article not found." };
   }
 
+  if (!hasPermission(userRole, ["SUPERADMIN", "ADMIN", "EDITOR", "AUTHOR"])) {
+    return { success: false, error: "Permission denied." };
+  }
+
   if (existing.authorId !== userId && !hasPermission(userRole, ["SUPERADMIN", "ADMIN", "EDITOR"])) {
     return { success: false, error: "Permission denied. You can only edit your own articles." };
   }
@@ -365,6 +379,10 @@ export async function deleteArticle(id: string): Promise<ApiResponse> {
   const existing = await prisma.article.findUnique({ where: { id } });
   if (!existing) {
     return { success: false, error: "Article not found." };
+  }
+
+  if (!hasPermission(userRole, ["SUPERADMIN", "ADMIN", "EDITOR", "AUTHOR"])) {
+    return { success: false, error: "Permission denied." };
   }
 
   if (existing.authorId !== userId && !hasPermission(userRole, ["SUPERADMIN", "ADMIN", "EDITOR"])) {
