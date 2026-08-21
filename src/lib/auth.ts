@@ -1,8 +1,11 @@
-import { NextAuthOptions } from "next-auth";
+import { NextAuthOptions, getServerSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { redirect } from "next/navigation";
+
+
 
 const providers: any[] = [
   CredentialsProvider({
@@ -183,5 +186,20 @@ export const authOptions: NextAuthOptions = {
 };
 
 export function hasPermission(userRole: string, allowedRoles: string[]): boolean {
-  return allowedRoles.includes(userRole);
+  if (!userRole) return false;
+  return allowedRoles.includes(userRole.toUpperCase());
 }
+
+export async function requireAdminRoleServer(
+  allowedRoles: string[] = ["SUPERADMIN", "ADMIN", "EDITOR", "AUTHOR"]
+) {
+  const session = await getServerSession(authOptions);
+  const userRole = (session?.user as any)?.role?.toUpperCase();
+
+  if (!session?.user || !userRole || !allowedRoles.includes(userRole)) {
+    redirect("/");
+  }
+
+  return session;
+}
+

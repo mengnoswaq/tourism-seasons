@@ -5,6 +5,7 @@ import { rateLimit } from "@/lib/rate-limit";
 
 // Configured Secret Route Path for Admin Area (defaults to /portal-x9k-manage)
 const DEFAULT_SECRET_PATH = "/portal-x9k-manage";
+const ALLOWED_ROLES = ["SUPERADMIN", "ADMIN", "EDITOR", "AUTHOR"];
 
 function getSecretPath(): string {
   const secretPath =
@@ -27,7 +28,7 @@ export async function middleware(req: NextRequest) {
     req.ip ||
     "127.0.0.1";
 
-  // 1. Detect stale NextAuth chunked cookies (removes header size overhead)
+  // 1. Detect and clean stale NextAuth chunked cookies
   const chunkedCookieKeys: string[] = [];
   cookies.getAll().forEach((c) => {
     if (
@@ -39,14 +40,6 @@ export async function middleware(req: NextRequest) {
     }
   });
 
-  // Helper to construct a stealth HTTP 404 response (prevents scanners from detecting admin route)
-  const createStealthNotFoundResponse = () => {
-    const notFoundUrl = new URL("/404", req.url);
-    const res = NextResponse.rewrite(notFoundUrl, { status: 404 });
-    cleanStaleCookies(res);
-    return res;
-  };
-
   const cleanStaleCookies = (res: NextResponse) => {
     if (chunkedCookieKeys.length > 0) {
       chunkedCookieKeys.forEach((key) => {
@@ -56,16 +49,36 @@ export async function middleware(req: NextRequest) {
     }
   };
 
+  const createRedirectToHomeResponse = () => {
+    const res = NextResponse.redirect(new URL("/", req.url));
+    cleanStaleCookies(res);
+    return res;
+  };
+
   // =========================================================================
-  // 2. SECURITY LAYER A: OBSCURE & MASK DEFAULT `/admin` ROUTE
-  // Any attempt to access default /admin or /admin/* directly returns HTTP 404 Not Found
+  // 2. DEFAULT `/admin` ROUTE HANDLING
+  // If anyone types /admin or /admin/*:
+  // - Authorized staff -> Redirect to secret route (e.g. /portal-x9k-manage)
+  // - Role USER or unauthenticated -> Immediately redirect to home page (/)
   // =========================================================================
   if (pathname === "/admin" || pathname.startsWith("/admin/")) {
-    return createStealthNotFoundResponse();
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    const userRole = (token?.role as string)?.toUpperCase();
+
+    if (token && userRole && ALLOWED_ROLES.includes(userRole)) {
+      const subPath = pathname.substring(6); // Remove "/admin"
+      const targetPath = `${secretPath}${subPath}`;
+      const res = NextResponse.redirect(new URL(targetPath, req.url));
+      cleanStaleCookies(res);
+      return res;
+    }
+
+    // Role USER or unauthenticated -> Block immediately and redirect to home page
+    return createRedirectToHomeResponse();
   }
 
   // =========================================================================
-  // 3. SECURITY LAYER B: AUTHENTICATION & SENSITIVE ENDPOINT RATE LIMITING
+  // 3. RATE LIMITING FOR SENSITIVE AUTH & ADMIN ROUTES
   // =========================================================================
   const isAuthApi = pathname.startsWith("/api/auth");
   const isSecretAdminRoute =
@@ -73,8 +86,7 @@ export async function middleware(req: NextRequest) {
 
   if (isAuthApi || isSecretAdminRoute) {
     const limiterKey = `${clientIp}:${isAuthApi ? "auth-api" : "admin-route"}`;
-    // Strict limit: 20 requests per minute per IP for sensitive routes
-    const limitResult = rateLimit(limiterKey, { limit: 20, windowMs: 60000 });
+    const limitResult = rateLimit(limiterKey, { limit: 30, windowMs: 60000 });
 
     if (!limitResult.success) {
       return new NextResponse(
@@ -94,54 +106,49 @@ export async function middleware(req: NextRequest) {
   }
 
   // =========================================================================
-  // 4. SECURITY LAYER C: PROTECTED SECRET ADMIN ROUTE PROCESSING
+  // 4. PROTECTED SECRET ADMIN ROUTE PROCESSING
   // =========================================================================
   if (isSecretAdminRoute) {
-    // C1: IP Whitelisting Check (Optional configuration via ALLOWED_ADMIN_IPS)
+    // C1: IP Whitelisting Check (Optional)
     const allowedIpsEnv = process.env.ALLOWED_ADMIN_IPS;
     if (allowedIpsEnv && allowedIpsEnv.trim() !== "") {
       const allowedIps = allowedIpsEnv.split(",").map((ip) => ip.trim());
       if (!allowedIps.includes(clientIp)) {
-        console.warn(`[Admin Security] Blocked unauthorized IP access attempt: ${clientIp}`);
-        return createStealthNotFoundResponse();
+        return createRedirectToHomeResponse();
       }
     }
 
-    // C2: Server-Side HTTP-Only JWT Token Validation
+    // C2: JWT Token Validation
     const token = await getToken({
       req,
       secret: process.env.NEXTAUTH_SECRET,
     });
 
     if (!token) {
-      // Return 404 instead of redirecting to login to keep secret route invisible to unauthenticated users
-      return createStealthNotFoundResponse();
+      return createRedirectToHomeResponse();
     }
 
     // C3: Strict User Role Authorization Check
     const userRole = (token.role as string)?.toUpperCase();
-    const allowedRoles = ["SUPERADMIN", "ADMIN", "EDITOR", "AUTHOR"];
-
-    if (!userRole || !allowedRoles.includes(userRole)) {
-      console.warn(`[Admin Security] Unauthorized role attempt by user ${token.sub}: ${userRole}`);
-      return createStealthNotFoundResponse();
+    if (!userRole || !ALLOWED_ROLES.includes(userRole)) {
+      // Role USER or non-staff -> Immediately redirect to home page
+      return createRedirectToHomeResponse();
     }
 
-    // C4: Multi-Factor Authentication (MFA) Check (Optional configuration via REQUIRE_MFA)
+    // C4: Multi-Factor Authentication (MFA) Check (Optional)
     if (process.env.REQUIRE_MFA === "true" && !token.isMfaVerified) {
-      // If MFA is required but not verified, rewrite to MFA verification path
       const mfaUrl = new URL(`${secretPath}/mfa-verify`, req.url);
       const mfaResponse = NextResponse.rewrite(mfaUrl);
       cleanStaleCookies(mfaResponse);
       return mfaResponse;
     }
 
-    // C5: Internal Next.js Route Rewrite
-    // Maps secret path (e.g. /portal-x9k-manage/articles) internally to /admin page handlers (/admin/articles)
+    // C5: Rewrite secret route internally to /admin page handler
     const targetSubPath = pathname.substring(secretPath.length);
-    const internalAdminPath = targetSubPath === "" || targetSubPath === "/"
-      ? "/admin"
-      : `/admin${targetSubPath}`;
+    const internalAdminPath =
+      targetSubPath === "" || targetSubPath === "/"
+        ? "/admin"
+        : `/admin${targetSubPath}`;
 
     const internalUrl = new URL(internalAdminPath, req.url);
     const response = NextResponse.rewrite(internalUrl);

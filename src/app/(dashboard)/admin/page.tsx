@@ -2,7 +2,8 @@ import React from "react";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { authOptions, requireAdminRoleServer } from "@/lib/auth";
+
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,7 +30,7 @@ import {
 } from "lucide-react";
 
 export default async function AdminDashboardPage() {
-  const session = await getServerSession(authOptions);
+  const session = await requireAdminRoleServer(["SUPERADMIN", "ADMIN", "EDITOR", "AUTHOR"]);
 
   const [
     articleCount,
