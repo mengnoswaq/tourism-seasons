@@ -23,6 +23,7 @@ import {
 import { Avatar } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/context/language-context";
+import { getAdminPath } from "@/lib/admin-route";
 
 export function AdminSidebar() {
   const pathname = usePathname();
@@ -39,16 +40,16 @@ export function AdminSidebar() {
   const userRole = (session?.user as any)?.role || "USER";
 
   const navItems = [
-    { label: t("Dashboard & Analytics", "ផ្ទាំងគ្រប់គ្រង & វិភាគ"), href: "/admin", icon: LayoutDashboard },
-    { label: t("Articles & Status", "អត្ថបទ & ស្ថានភាព"), href: "/admin/articles", icon: Newspaper },
-    { label: t("Create Story", "បង្កើតអត្ថបទថ្មី"), href: "/admin/articles/create", icon: PlusCircle },
-    { label: t("Provinces Control", "គ្រប់គ្រង ២៥ ខេត្ត"), href: "/admin/provinces", icon: Tag, roles: ["SUPERADMIN", "ADMIN"] },
-    { label: t("Reader Comments", "មតិអ្នកអាន"), href: "/admin/comments", icon: Users, roles: ["SUPERADMIN", "ADMIN"] },
-    { label: t("Navbar Menu", "ម៉ឺនុយ របាររកមើល"), href: "/admin/navbar", icon: Menu, roles: ["SUPERADMIN", "ADMIN"] },
-    { label: t("Categories", "ប្រភេទព័ត៌មាន"), href: "/admin/categories", icon: Folder, roles: ["SUPERADMIN", "ADMIN"] },
-    { label: t("User Roles", "តួនាទីអ្នកប្រើប្រាស់"), href: "/admin/users", icon: Users, roles: ["SUPERADMIN", "ADMIN"] },
-    { label: t("Site Settings", "ការកំណត់គេហទំព័រ"), href: "/admin/settings", icon: Settings, roles: ["SUPERADMIN", "ADMIN"] },
-    { label: t("Edit My Profile", "កែប្រែប្រវត្តិរូបខ្ញុំ"), href: "/admin/profile", icon: UserCircle },
+    { label: t("Dashboard & Analytics", "ផ្ទាំងគ្រប់គ្រង & វិភាគ"), href: getAdminPath(), rawSubPath: "", icon: LayoutDashboard },
+    { label: t("Articles & Status", "អត្ថបទ & ស្ថានភាព"), href: getAdminPath("/articles"), rawSubPath: "/articles", icon: Newspaper },
+    { label: t("Create Story", "បង្កើតអត្ថបទថ្មី"), href: getAdminPath("/articles/create"), rawSubPath: "/articles/create", icon: PlusCircle },
+    { label: t("Provinces Control", "គ្រប់គ្រង ២៥ ខេត្ត"), href: getAdminPath("/provinces"), rawSubPath: "/provinces", icon: Tag, roles: ["SUPERADMIN", "ADMIN"] },
+    { label: t("Reader Comments", "មតិអ្នកអាន"), href: getAdminPath("/comments"), rawSubPath: "/comments", icon: Users, roles: ["SUPERADMIN", "ADMIN"] },
+    { label: t("Navbar Menu", "ម៉ឺនុយ របាររកមើល"), href: getAdminPath("/navbar"), rawSubPath: "/navbar", icon: Menu, roles: ["SUPERADMIN", "ADMIN"] },
+    { label: t("Categories", "ប្រភេទព័ត៌មាន"), href: getAdminPath("/categories"), rawSubPath: "/categories", icon: Folder, roles: ["SUPERADMIN", "ADMIN"] },
+    { label: t("User Roles", "តួនាទីអ្នកប្រើប្រាស់"), href: getAdminPath("/users"), rawSubPath: "/users", icon: Users, roles: ["SUPERADMIN", "ADMIN"] },
+    { label: t("Site Settings", "ការកំណត់គេហទំព័រ"), href: getAdminPath("/settings"), rawSubPath: "/settings", icon: Settings, roles: ["SUPERADMIN", "ADMIN"] },
+    { label: t("Edit My Profile", "កែប្រែប្រវត្តិរូបខ្ញុំ"), href: getAdminPath("/profile"), rawSubPath: "/profile", icon: UserCircle },
   ];
 
   const filteredNavItems = navItems.filter(
@@ -61,7 +62,8 @@ export function AdminSidebar() {
       {/* 1. Mobile & Tablet Top Bar (< lg screen)   */}
       {/* ========================================== */}
       <div className="lg:hidden sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 py-3 flex items-center justify-between shadow-sm">
-        <Link href="/admin" className="flex items-center gap-2.5">
+        <Link href={getAdminPath()} className="flex items-center gap-2.5">
+
           <img
             src="/logo.png"
             alt="Tourism Seasons Admin Dashboard"
@@ -107,7 +109,7 @@ export function AdminSidebar() {
             <div>
               {/* Mobile Drawer Header */}
               <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-2">
-                <Link href="/admin" onClick={() => setMobileOpen(false)} className="flex items-center gap-3">
+                <Link href={getAdminPath()} onClick={() => setMobileOpen(false)} className="flex items-center gap-3">
                   <img src="/logo.png" alt="Logo" className="h-9 w-auto object-contain" />
                   <div className="flex flex-col">
                     <span className="font-black text-sm tracking-tight text-slate-900 leading-none">
@@ -166,7 +168,7 @@ export function AdminSidebar() {
               {session?.user && (
                 <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100 group">
                   <Link
-                    href="/admin/profile"
+                    href={getAdminPath("/profile")}
                     onClick={() => setMobileOpen(false)}
                     className="flex items-center gap-2.5 overflow-hidden flex-1 cursor-pointer"
                   >
@@ -206,7 +208,7 @@ export function AdminSidebar() {
         <div>
           {/* Sidebar Header */}
           <div className="h-20 flex items-center justify-between px-4 border-b border-slate-100">
-            <Link href="/admin" className="flex items-center gap-3 overflow-hidden">
+            <Link href={getAdminPath()} className="flex items-center gap-3 overflow-hidden">
               <img
                 src="/logo.png"
                 alt="Tourism Seasons Admin Dashboard"
@@ -275,7 +277,7 @@ export function AdminSidebar() {
 
           {session?.user && (
             <div className={cn("flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-100 group hover:bg-slate-100/80 transition-colors", collapsed && "justify-center")}>
-              <Link href="/admin/profile" className="flex items-center gap-2.5 overflow-hidden flex-1 cursor-pointer" title={t("Edit Profile", "កែប្រែប្រវត្តិរូប")}>
+              <Link href={getAdminPath("/profile")} className="flex items-center gap-2.5 overflow-hidden flex-1 cursor-pointer" title={t("Edit Profile", "កែប្រែប្រវត្តិរូប")}>
                 <Avatar src={session.user.image} fallback={session.user.name || "U"} size="sm" className="group-hover:ring-2 group-hover:ring-[#2791F5]/40 transition-all" />
                 {!collapsed && (
                   <div className="flex flex-col truncate">

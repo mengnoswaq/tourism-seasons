@@ -10,8 +10,10 @@ import { useRouter } from "next/navigation";
 
 import { NewsTicker } from "@/components/layout/ticker";
 import { useLanguage } from "@/context/language-context";
+import { getAdminPath } from "@/lib/admin-route";
 
 interface NavItemType {
+
   id: string;
   label: string;
   labelKhmer?: string | null;
@@ -136,7 +138,7 @@ export function Navbar({ categories, navItems, headlines, siteSettings }: Navbar
               {session?.user ? (
                 <div className="flex items-center gap-3">
                   {canAccessAdmin && (
-                    <Link href="/admin">
+                    <Link href={getAdminPath()}>
                       <Button variant="outline" size="sm" className="gap-1.5 text-xs">
                         <LayoutDashboard className="w-3.5 h-3.5 text-[#2791F5]" />
                         {t("Dashboard", "ផ្ទាំងគ្រប់គ្រង")}
@@ -278,7 +280,7 @@ export function Navbar({ categories, navItems, headlines, siteSettings }: Navbar
 
                     {canAccessAdmin && (
                       <Link
-                        href="/admin"
+                        href={getAdminPath()}
                         onClick={() => setIsMobileMenuOpen(false)}
                         className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
                       >
